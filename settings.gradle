@@ -1,0 +1,3 @@
+rootProject.name='Permission'
+include ':app'
+include ':peractivity'
