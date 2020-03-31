@@ -25,7 +25,6 @@ import java.util.List;
  * 不同权限需求种类，不要在同一个权限组里发起申请，因为code你一次只能传1种，4种需求种类对应4种应用场景，所以
  * 不要尝试使用一套逻辑来同时兼容4种模式，应该是不现实的。
  * <p>
- * 不要去判断hasPermission()为false的情况，因为会自动申请权限，false的返回是没有意义的
  */
 
 public class PermissionActivity extends AppCompatActivity {
@@ -82,9 +81,8 @@ public class PermissionActivity extends AppCompatActivity {
      * 有权限返回true，没有权限返回false并自动申请权限
      *
      * @param permissions 不定长数组
-     * @return 是否有权限，一般调用不判断返回否的操作
      */
-    public boolean hasPermission(int code, String... permissions) {
+    public boolean askForPermission(int code, String... permissions) {
         List<String> realMissPermission = new ArrayList<>();
         boolean flag = true;
         for (String permission : permissions) {
@@ -147,7 +145,7 @@ public class PermissionActivity extends AppCompatActivity {
         if (permissionFlag) {
             //通过了申请的权限
             if (loadMethodFlag){
-                doAfterPermission();//权限通过，执行对应方法
+                permissionAllowed();//权限通过，执行对应方法
             }
         }else {
             if (requiredFlag) {
@@ -163,14 +161,14 @@ public class PermissionActivity extends AppCompatActivity {
                         showMissingPermissionDialog(names);
                     }else {
                         if (loadMethodFlag){
-                            rejectAfterPermission();
+                            permissionRejected();
                         }
                     }
                 }
             }else {
                 Log.e("Permission:","Permission had been rejected");
                 if (loadMethodFlag){
-                    rejectAfterPermission();
+                    permissionRejected();
                 }
             }
         }
@@ -179,13 +177,13 @@ public class PermissionActivity extends AppCompatActivity {
     /**
      * 给子类提供重写的成功接口
      */
-    public void doAfterPermission() {
+    public void permissionAllowed() {
     }
 
     /**
      * 给子类提供重写的失败接口
      */
-    public void rejectAfterPermission() {
+    public void permissionRejected() {
     }
 
 
@@ -198,7 +196,7 @@ public class PermissionActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (loadMethodFlag){
-                    rejectAfterPermission();
+                    permissionRejected();
                 }
             }
         });
@@ -207,7 +205,7 @@ public class PermissionActivity extends AppCompatActivity {
             @Override
             public void onCancel(DialogInterface dialog) {
                 if (loadMethodFlag){
-                    rejectAfterPermission();
+                    permissionRejected();
                 }
             }
         });
