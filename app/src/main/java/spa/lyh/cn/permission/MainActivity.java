@@ -14,9 +14,10 @@ public class MainActivity extends PermissionActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (askForPermission(REQUIRED_LOAD_METHOD, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-            Log.e("liyuhao","自动授权");
-        }
+        askForPermission(REQUIRED_LOAD_METHOD,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA,
+                Manifest.permission.ACCESS_FINE_LOCATION);
 
     }
 

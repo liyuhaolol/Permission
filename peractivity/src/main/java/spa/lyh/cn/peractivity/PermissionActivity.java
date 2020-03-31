@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -38,6 +39,10 @@ public class PermissionActivity extends AppCompatActivity {
     public static final int NOT_REQUIRED_ONLY_REQUEST = 4;
 
     private static final String PACKAGE_URL_SCHEME = "package:";
+
+    private static final int SETTING_REQUEST = 8848;
+
+    private List<String> missPermission;
 
     //被永久拒绝之后显示的dialog
     private AlertDialog.Builder builder;
@@ -82,7 +87,7 @@ public class PermissionActivity extends AppCompatActivity {
      *
      * @param permissions 不定长数组
      */
-    public boolean askForPermission(int code, String... permissions) {
+    public void askForPermission(int code, String... permissions) {
         List<String> realMissPermission = new ArrayList<>();
         boolean flag = true;
         for (String permission : permissions) {
@@ -95,7 +100,9 @@ public class PermissionActivity extends AppCompatActivity {
             String[] missPermissions = realMissPermission.toArray(new String[realMissPermission.size()]);
             requestPermission(code, missPermissions);
         }
-        return flag;
+        if (flag){
+            permissionAllowed();
+        }
     }
 
     /**
@@ -158,6 +165,12 @@ public class PermissionActivity extends AppCompatActivity {
                     }
                     if (dialogFlag) {
                         //显示缺少权限，并解释为何需要这个权限
+                        if (missPermission != null){
+                            missPermission.clear();
+                        }else {
+                            missPermission = new ArrayList<>();
+                        }
+                        missPermission.addAll(per);
                         showMissingPermissionDialog(names);
                     }else {
                         if (loadMethodFlag){
@@ -189,6 +202,7 @@ public class PermissionActivity extends AppCompatActivity {
 
     private void initMissingPermissionDialog() {
         builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false);
         builder.setTitle("帮助");
 
         // 拒绝, 退出应用
@@ -243,7 +257,7 @@ public class PermissionActivity extends AppCompatActivity {
     private void startAppSettings() {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(Uri.parse(PACKAGE_URL_SCHEME + getPackageName()));
-        startActivity(intent);
+        startActivityForResult(intent,SETTING_REQUEST);
     }
 
     /**
@@ -254,53 +268,44 @@ public class PermissionActivity extends AppCompatActivity {
      */
     private List<String> selectGroup(List<String> permissions) {
         List<String> group = new ArrayList<>();
-        //匹配权限表
-        /*for (String permission : permissions) {
-            if (permission.equals(Manifest.permission.READ_CALENDAR) ||
-                    permission.equals(Manifest.permission.WRITE_CALENDAR)) {
-                group.add("日历");
-            } else if (permission.equals(Manifest.permission.CAMERA)) {
-                group.add("相机");
-            } else if (permission.equals(Manifest.permission.READ_CONTACTS) ||
-                    permission.equals(Manifest.permission.WRITE_CONTACTS) ||
-                    permission.equals(Manifest.permission.GET_ACCOUNTS)) {
-                group.add("联系人");
-            } else if (permission.equals(Manifest.permission.ACCESS_FINE_LOCATION) ||
-                    permission.equals(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                group.add("定位");
-            } else if (permission.equals(Manifest.permission.RECORD_AUDIO)) {
-                group.add("录音");
-            } else if (permission.equals(Manifest.permission.READ_PHONE_STATE) ||
-                    permission.equals(Manifest.permission.CALL_PHONE) ||
-                    permission.equals(Manifest.permission.READ_CALL_LOG) ||
-                    permission.equals(Manifest.permission.WRITE_CALL_LOG) ||
-                    permission.equals(Manifest.permission.ADD_VOICEMAIL) ||
-                    permission.equals(Manifest.permission.USE_SIP) ||
-                    permission.equals(Manifest.permission.PROCESS_OUTGOING_CALLS)) {
-                group.add("手机状态");
-            } else if (permission.equals(Manifest.permission.BODY_SENSORS)) {
-                group.add("传感器");
-            } else if (permission.equals(Manifest.permission.SEND_SMS) ||
-                    permission.equals(Manifest.permission.RECEIVE_SMS) ||
-                    permission.equals(Manifest.permission.READ_SMS) ||
-                    permission.equals(Manifest.permission.RECEIVE_WAP_PUSH) ||
-                    permission.equals(Manifest.permission.RECEIVE_MMS)) {
-                group.add("短信");
-            } else if (permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE) ||
-                    permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                group.add("存储读写");
-            }
-        }*/
         for (String permission : permissions) {
             if (permissionList != null){
                 group.add(permissionList.get(permission));
             }
         }
-
-
-
         //去重
         group = new ArrayList<>(new HashSet<>(group));
         return group;
+    }
+
+    private void recheckPermission(){
+        if (missPermission != null && missPermission.size() > 0){
+            List<String> per = new ArrayList<>();
+            //重新检查权限
+            for (String permission:missPermission){
+                if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                    per.add(permission);
+                }
+            }
+            if (per.size() > 0){
+                //依然有权限未通过
+                missPermission.clear();
+                missPermission.addAll(per);
+                showMissingPermissionDialog(selectGroup(per));
+            }else {
+                missPermission.clear();
+                permissionAllowed();
+            }
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SETTING_REQUEST){
+            //从设置返回的回调
+            recheckPermission();
+        }
     }
 }
