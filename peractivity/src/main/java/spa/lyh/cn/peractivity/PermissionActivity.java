@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -14,12 +15,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 /**
- * Created by liyuhao on 2017/6/5.
+ * Created by liyuhao on 2020/4/1.
  * 使用事项，权限是按照权限组来授权的，所以申请权限时，尽量不要同时申请同一权限组的权限，比如
  * WRITE_EXTERNAL_STORAGE和READ_EXTERNAL_STORAGE，只要申请其中一个权限，整个group.STORAGE都会被赋予权限
  * <p>
@@ -90,7 +92,8 @@ public class PermissionActivity extends AppCompatActivity {
     public void askForPermission(int code, String... permissions) {
         List<String> realMissPermission = new ArrayList<>();
         boolean flag = true;
-        for (String permission : permissions) {
+        String per[] = checkAndroid10Permission(permissions);
+        for (String permission : per) {
             if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                 realMissPermission.add(permission);
                 flag = false;
@@ -297,6 +300,28 @@ public class PermissionActivity extends AppCompatActivity {
                 permissionAllowed();
             }
         }
+    }
+
+    private String[] checkAndroid10Permission(String permission[]){
+        List<String> per = Arrays.asList(permission);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            per = new ArrayList<>();
+            for (String permi:permission){
+                if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)
+                && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
+                    per.add(permi);
+                }
+            }
+        }else {
+            for (int i = 0;i<per.size();i++){
+                if (per.get(i).equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)){
+                    per.set(i,ManifestPro.permission.READ_PHONE_STATE);
+                }else if (per.get(i).equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
+                    per.set(i,ManifestPro.permission.WRITE_EXTERNAL_STORAGE);
+                }
+            }
+        }
+        return per.toArray(new String[per.size()]);
     }
 
 

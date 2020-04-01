@@ -6,6 +6,7 @@ import android.Manifest;
 import android.os.Bundle;
 import android.util.Log;
 
+import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
 
 public class MainActivity extends PermissionActivity {
@@ -15,9 +16,10 @@ public class MainActivity extends PermissionActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         askForPermission(REQUIRED_LOAD_METHOD,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA,
-                Manifest.permission.ACCESS_FINE_LOCATION);
+                ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9,
+                ManifestPro.permission.CAMERA,
+                ManifestPro.permission.ACCESS_FINE_LOCATION,
+                ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9);
 
     }
 
