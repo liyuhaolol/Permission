@@ -9,8 +9,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 3
-        versionName "1.0.2"
+        versionCode versions.versionCode
+        versionName versions.versionName
 
         consumerProguardFiles 'consumer-rules.pro'
     }
@@ -27,7 +27,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation "androidx.appcompat:appcompat:${versions.appcompat}"
 }
 
 def siteUrl = 'https://github.com/liyuhaolol/Permission'
@@ -38,7 +38,7 @@ def libName = 'peractivity'
 
 group = "spa.lyh.cn"
 
-version = "1.0.2"
+version = versions.versionName
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -68,7 +68,7 @@ install{
                     dependency{
                         groupId 'androidx.appcompat'
                         artifactId 'appcompat'
-                        version '1.1.0'
+                        version versions.appcompat
                         scope 'implementation'
                     }
                 }

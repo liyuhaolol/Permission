@@ -1,0 +1,9 @@
+ext {
+    versions = [
+            versionCode : 4,
+            versionName : '1.0.3',
+
+            appcompat : '1.2.0'
+
+    ]
+}
