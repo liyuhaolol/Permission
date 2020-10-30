@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -81,11 +80,6 @@ public class PermissionActivity extends AppCompatActivity {
         permissionList.put("android.permission.READ_EXTERNAL_STORAGE","存储读写");
         permissionList.put("android.permission.WRITE_EXTERNAL_STORAGE","存储读写");
 
-    }
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     /**
