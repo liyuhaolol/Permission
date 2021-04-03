@@ -21,6 +21,9 @@ public class MainActivity extends PermissionActivity {
                 ManifestPro.permission.ACCESS_FINE_LOCATION,
                 ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9,
                 ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9);
+        /*askForPermission(REQUIRED_LOAD_METHOD,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                "定位");*/
 
     }
 

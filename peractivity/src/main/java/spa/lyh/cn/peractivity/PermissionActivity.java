@@ -63,6 +63,7 @@ public class PermissionActivity extends AppCompatActivity {
         permissionList.put("android.permission.GET_ACCOUNTS","联系人");
         permissionList.put("android.permission.ACCESS_FINE_LOCATION","定位");
         permissionList.put("android.permission.ACCESS_COARSE_LOCATION","定位");
+        permissionList.put("android.permission.ACCESS_BACKGROUND_LOCATION","定位");
         permissionList.put("android.permission.RECORD_AUDIO","录音");
         permissionList.put("android.permission.READ_PHONE_STATE","手机状态");
         permissionList.put("android.permission.CALL_PHONE","手机状态");
