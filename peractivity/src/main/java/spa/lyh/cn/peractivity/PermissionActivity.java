@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -53,34 +54,39 @@ public class PermissionActivity extends AppCompatActivity {
 
     private static HashMap<String,String> permissionList;
 
-    static {
-        permissionList = new HashMap<>();
-        permissionList.put("android.permission.READ_CALENDAR","日历");
-        permissionList.put("android.permission.WRITE_CALENDAR","日历");
-        permissionList.put("android.permission.CAMERA","相机");
-        permissionList.put("android.permission.READ_CONTACTS","联系人");
-        permissionList.put("android.permission.WRITE_CONTACTS","联系人");
-        permissionList.put("android.permission.GET_ACCOUNTS","联系人");
-        permissionList.put("android.permission.ACCESS_FINE_LOCATION","定位");
-        permissionList.put("android.permission.ACCESS_COARSE_LOCATION","定位");
-        permissionList.put("android.permission.ACCESS_BACKGROUND_LOCATION","定位");
-        permissionList.put("android.permission.RECORD_AUDIO","录音");
-        permissionList.put("android.permission.READ_PHONE_STATE","手机状态");
-        permissionList.put("android.permission.CALL_PHONE","手机状态");
-        permissionList.put("android.permission.READ_CALL_LOG","手机状态");
-        permissionList.put("android.permission.WRITE_CALL_LOG","手机状态");
-        permissionList.put("android.permission.ADD_VOICEMAIL","手机状态");
-        permissionList.put("android.permission.USE_SIP","手机状态");
-        permissionList.put("android.permission.PROCESS_OUTGOING_CALLS","手机状态");
-        permissionList.put("android.permission.BODY_SENSORS","传感器");
-        permissionList.put("android.permission.SEND_SMS","短信");
-        permissionList.put("android.permission.RECEIVE_SMS","短信");
-        permissionList.put("android.permission.READ_SMS","短信");
-        permissionList.put("android.permission.RECEIVE_WAP_PUSH","短信");
-        permissionList.put("android.permission.RECEIVE_MMS","短信");
-        permissionList.put("android.permission.READ_EXTERNAL_STORAGE","存储读写");
-        permissionList.put("android.permission.WRITE_EXTERNAL_STORAGE","存储读写");
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initList();//因为要国际化，只能改为动态生成
+    }
 
+    private void initList(){
+        permissionList = new HashMap<>();
+        permissionList.put("android.permission.READ_CALENDAR",getString(R.string.CALENDAR));
+        permissionList.put("android.permission.WRITE_CALENDAR",getString(R.string.CALENDAR));
+        permissionList.put("android.permission.CAMERA",getString(R.string.CAMERA));
+        permissionList.put("android.permission.READ_CONTACTS",getString(R.string.CONTACTS));
+        permissionList.put("android.permission.WRITE_CONTACTS",getString(R.string.CONTACTS));
+        permissionList.put("android.permission.GET_ACCOUNTS",getString(R.string.CONTACTS));
+        permissionList.put("android.permission.ACCESS_FINE_LOCATION",getString(R.string.LOCATION));
+        permissionList.put("android.permission.ACCESS_COARSE_LOCATION",getString(R.string.LOCATION));
+        permissionList.put("android.permission.ACCESS_BACKGROUND_LOCATION",getString(R.string.LOCATION));
+        permissionList.put("android.permission.RECORD_AUDIO",getString(R.string.RECORD_AUDIO));
+        permissionList.put("android.permission.READ_PHONE_STATE",getString(R.string.PHONE_STATE));
+        permissionList.put("android.permission.CALL_PHONE",getString(R.string.PHONE_STATE));
+        permissionList.put("android.permission.READ_CALL_LOG",getString(R.string.PHONE_STATE));
+        permissionList.put("android.permission.WRITE_CALL_LOG",getString(R.string.PHONE_STATE));
+        permissionList.put("android.permission.ADD_VOICEMAIL",getString(R.string.PHONE_STATE));
+        permissionList.put("android.permission.USE_SIP",getString(R.string.PHONE_STATE));
+        permissionList.put("android.permission.PROCESS_OUTGOING_CALLS",getString(R.string.PHONE_STATE));
+        permissionList.put("android.permission.BODY_SENSORS",getString(R.string.SENSORS));
+        permissionList.put("android.permission.SEND_SMS",getString(R.string.SMS));
+        permissionList.put("android.permission.RECEIVE_SMS",getString(R.string.SMS));
+        permissionList.put("android.permission.READ_SMS",getString(R.string.SMS));
+        permissionList.put("android.permission.RECEIVE_WAP_PUSH",getString(R.string.SMS));
+        permissionList.put("android.permission.RECEIVE_MMS",getString(R.string.SMS));
+        permissionList.put("android.permission.READ_EXTERNAL_STORAGE",getString(R.string.STORAGE));
+        permissionList.put("android.permission.WRITE_EXTERNAL_STORAGE",getString(R.string.STORAGE));
     }
 
     /**
@@ -206,10 +212,10 @@ public class PermissionActivity extends AppCompatActivity {
     private void initMissingPermissionDialog() {
         builder = new AlertDialog.Builder(this);
         builder.setCancelable(false);
-        builder.setTitle("帮助");
+        builder.setTitle(getString(R.string.help));
 
         // 拒绝, 退出应用
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancal, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (loadMethodFlag){
@@ -227,7 +233,7 @@ public class PermissionActivity extends AppCompatActivity {
             }
         });
 
-        builder.setPositiveButton("设置", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.setting_name), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //跳转到，设置的对应界面
@@ -250,7 +256,7 @@ public class PermissionActivity extends AppCompatActivity {
                 content = content + name + "\n";
             }
         }
-        builder.setMessage("当前应用缺少必要权限:\n" + content + "请点击\"设置\"-\"权限\"-打开所需权限。");
+        builder.setMessage(getString(R.string.leak)+"\n" + content + getString(R.string.go_setting));
         builder.show();
     }
 

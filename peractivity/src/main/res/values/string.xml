@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="CALENDAR">日历</string>
+    <string name="CAMERA">相机</string>
+    <string name="CONTACTS">联系人</string>
+    <string name="LOCATION">定位</string>
+    <string name="RECORD_AUDIO">录音</string>
+    <string name="PHONE_STATE">手机状态</string>
+    <string name="SENSORS">传感器</string>
+    <string name="SMS">短信</string>
+    <string name="STORAGE">存储读写</string>
+    <string name="help">帮助</string>
+    <string name="cancal">取消</string>
+    <string name="setting_name">设置</string>
+    <string name="leak">当前应用缺少必要权限:</string>
+    <string name="go_setting">请点击"设置"-"权限"-打开所需权限。</string>
+
+</resources>
