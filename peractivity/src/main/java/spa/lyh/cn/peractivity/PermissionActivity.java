@@ -1,5 +1,6 @@
 package spa.lyh.cn.peractivity;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,7 +10,9 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -20,6 +23,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+
+import spa.lyh.cn.peractivity.util.LanguageUtils;
 
 /**
  * Created by liyuhao on 2020/4/1.
@@ -52,41 +57,35 @@ public class PermissionActivity extends AppCompatActivity {
 
     private boolean loadMethodFlag;//是否自动加载方法
 
-    private static HashMap<String,String> permissionList;
+    private final static HashMap<String,Integer> permissionList;
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        initList();//因为要国际化，只能改为动态生成
-    }
-
-    private void initList(){
+    static {
         permissionList = new HashMap<>();
-        permissionList.put("android.permission.READ_CALENDAR",getString(R.string.CALENDAR));
-        permissionList.put("android.permission.WRITE_CALENDAR",getString(R.string.CALENDAR));
-        permissionList.put("android.permission.CAMERA",getString(R.string.CAMERA));
-        permissionList.put("android.permission.READ_CONTACTS",getString(R.string.CONTACTS));
-        permissionList.put("android.permission.WRITE_CONTACTS",getString(R.string.CONTACTS));
-        permissionList.put("android.permission.GET_ACCOUNTS",getString(R.string.CONTACTS));
-        permissionList.put("android.permission.ACCESS_FINE_LOCATION",getString(R.string.LOCATION));
-        permissionList.put("android.permission.ACCESS_COARSE_LOCATION",getString(R.string.LOCATION));
-        permissionList.put("android.permission.ACCESS_BACKGROUND_LOCATION",getString(R.string.LOCATION));
-        permissionList.put("android.permission.RECORD_AUDIO",getString(R.string.RECORD_AUDIO));
-        permissionList.put("android.permission.READ_PHONE_STATE",getString(R.string.PHONE_STATE));
-        permissionList.put("android.permission.CALL_PHONE",getString(R.string.PHONE_STATE));
-        permissionList.put("android.permission.READ_CALL_LOG",getString(R.string.PHONE_STATE));
-        permissionList.put("android.permission.WRITE_CALL_LOG",getString(R.string.PHONE_STATE));
-        permissionList.put("android.permission.ADD_VOICEMAIL",getString(R.string.PHONE_STATE));
-        permissionList.put("android.permission.USE_SIP",getString(R.string.PHONE_STATE));
-        permissionList.put("android.permission.PROCESS_OUTGOING_CALLS",getString(R.string.PHONE_STATE));
-        permissionList.put("android.permission.BODY_SENSORS",getString(R.string.SENSORS));
-        permissionList.put("android.permission.SEND_SMS",getString(R.string.SMS));
-        permissionList.put("android.permission.RECEIVE_SMS",getString(R.string.SMS));
-        permissionList.put("android.permission.READ_SMS",getString(R.string.SMS));
-        permissionList.put("android.permission.RECEIVE_WAP_PUSH",getString(R.string.SMS));
-        permissionList.put("android.permission.RECEIVE_MMS",getString(R.string.SMS));
-        permissionList.put("android.permission.READ_EXTERNAL_STORAGE",getString(R.string.STORAGE));
-        permissionList.put("android.permission.WRITE_EXTERNAL_STORAGE",getString(R.string.STORAGE));
+        permissionList.put("android.permission.READ_CALENDAR",R.string.CALENDAR);
+        permissionList.put("android.permission.WRITE_CALENDAR",R.string.CALENDAR);
+        permissionList.put("android.permission.CAMERA",R.string.CAMERA);
+        permissionList.put("android.permission.READ_CONTACTS",R.string.CONTACTS);
+        permissionList.put("android.permission.WRITE_CONTACTS",R.string.CONTACTS);
+        permissionList.put("android.permission.GET_ACCOUNTS",R.string.CONTACTS);
+        permissionList.put("android.permission.ACCESS_FINE_LOCATION",R.string.LOCATION);
+        permissionList.put("android.permission.ACCESS_COARSE_LOCATION",R.string.LOCATION);
+        permissionList.put("android.permission.ACCESS_BACKGROUND_LOCATION",R.string.LOCATION);
+        permissionList.put("android.permission.RECORD_AUDIO",R.string.RECORD_AUDIO);
+        permissionList.put("android.permission.READ_PHONE_STATE",R.string.PHONE_STATE);
+        permissionList.put("android.permission.CALL_PHONE",R.string.PHONE_STATE);
+        permissionList.put("android.permission.READ_CALL_LOG",R.string.PHONE_STATE);
+        permissionList.put("android.permission.WRITE_CALL_LOG",R.string.PHONE_STATE);
+        permissionList.put("android.permission.ADD_VOICEMAIL",R.string.PHONE_STATE);
+        permissionList.put("android.permission.USE_SIP",R.string.PHONE_STATE);
+        permissionList.put("android.permission.PROCESS_OUTGOING_CALLS",R.string.PHONE_STATE);
+        permissionList.put("android.permission.BODY_SENSORS",R.string.SENSORS);
+        permissionList.put("android.permission.SEND_SMS",R.string.SMS);
+        permissionList.put("android.permission.RECEIVE_SMS",R.string.SMS);
+        permissionList.put("android.permission.READ_SMS",R.string.SMS);
+        permissionList.put("android.permission.RECEIVE_WAP_PUSH",R.string.SMS);
+        permissionList.put("android.permission.RECEIVE_MMS",R.string.SMS);
+        permissionList.put("android.permission.READ_EXTERNAL_STORAGE",R.string.STORAGE);
+        permissionList.put("android.permission.WRITE_EXTERNAL_STORAGE",R.string.STORAGE);
     }
 
     /**
@@ -126,6 +125,7 @@ public class PermissionActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         boolean permissionFlag = true;//权限是否全部通过
         boolean dialogFlag = false;//是否显示设置dialog
         boolean requiredFlag = false;//是否为项目必须的权限
@@ -156,14 +156,14 @@ public class PermissionActivity extends AppCompatActivity {
                 requiredFlag = false;
                 break;
         }
-        List<String> names = selectGroup(per);//判断被拒绝的权限组名称
+        List<Integer> ids = selectGroup(per);//判断被拒绝的权限组名称
 
         if (permissionFlag) {
             //通过了申请的权限
-            if (loadMethodFlag){
+            if (loadMethodFlag) {
                 permissionAllowed();//权限通过，执行对应方法
             }
-        }else {
+        } else {
             if (requiredFlag) {
                 if (per.size() > 0) {//严谨判断大于0
                     for (String permission : per) {
@@ -174,22 +174,22 @@ public class PermissionActivity extends AppCompatActivity {
                     }
                     if (dialogFlag) {
                         //显示缺少权限，并解释为何需要这个权限
-                        if (missPermission != null){
+                        if (missPermission != null) {
                             missPermission.clear();
-                        }else {
+                        } else {
                             missPermission = new ArrayList<>();
                         }
                         missPermission.addAll(per);
-                        showMissingPermissionDialog(names);
-                    }else {
-                        if (loadMethodFlag){
+                        showMissingPermissionDialog(ids);
+                    } else {
+                        if (loadMethodFlag) {
                             permissionRejected();
                         }
                     }
                 }
-            }else {
-                Log.e("Permission:","Permission had been rejected");
-                if (loadMethodFlag){
+            } else {
+                Log.e("Permission:", "Permission had been rejected");
+                if (loadMethodFlag) {
                     permissionRejected();
                 }
             }
@@ -212,10 +212,10 @@ public class PermissionActivity extends AppCompatActivity {
     private void initMissingPermissionDialog() {
         builder = new AlertDialog.Builder(this);
         builder.setCancelable(false);
-        builder.setTitle(getString(R.string.help));
+        builder.setTitle(getTrueString(this,R.string.help));
 
         // 拒绝, 退出应用
-        builder.setNegativeButton(R.string.cancal, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getTrueString(this,R.string.cancal), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (loadMethodFlag){
@@ -233,7 +233,7 @@ public class PermissionActivity extends AppCompatActivity {
             }
         });
 
-        builder.setPositiveButton(getString(R.string.setting_name), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getTrueString(this,R.string.setting_name), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //跳转到，设置的对应界面
@@ -246,17 +246,17 @@ public class PermissionActivity extends AppCompatActivity {
     /**
      * 显示解释设置dialog
      *
-     * @param names 权限组名
+     * @param ids 权限组名
      */
-    private void showMissingPermissionDialog(List<String> names) {
+    private void showMissingPermissionDialog(List<Integer> ids) {
         String content = "";
         //将权限组名字转换为字符串
-        if (names.size() > 0) {
-            for (String name : names) {
-                content = content + name + "\n";
+        if (ids.size() > 0) {
+            for (int id : ids) {
+                content = content + getTrueString(this,id) + "\n";
             }
         }
-        builder.setMessage(getString(R.string.leak)+"\n" + content + getString(R.string.go_setting));
+        builder.setMessage(getTrueString(this,R.string.leak)+"\n" + content + getTrueString(this,R.string.go_setting));
         builder.show();
     }
 
@@ -275,8 +275,8 @@ public class PermissionActivity extends AppCompatActivity {
      * @param permissions 权限名
      * @return 权限组名
      */
-    private List<String> selectGroup(List<String> permissions) {
-        List<String> group = new ArrayList<>();
+    private List<Integer> selectGroup(List<String> permissions) {
+        List<Integer> group = new ArrayList<>();
         for (String permission : permissions) {
             if (permissionList != null){
                 group.add(permissionList.get(permission));
@@ -314,7 +314,7 @@ public class PermissionActivity extends AppCompatActivity {
             per = new ArrayList<>();
             for (String permi:permission){
                 if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)
-                && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
+                        && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
                     per.add(permi);
                 }
             }
@@ -337,6 +337,16 @@ public class PermissionActivity extends AppCompatActivity {
         if (requestCode == SETTING_REQUEST){
             //从设置返回的回调
             recheckPermission();
+        }
+    }
+
+    private String getTrueString(Context context,@StringRes int id){
+        if (LanguageUtils.isActivited()){
+            //启动了国际化
+            return LanguageUtils.getLanguageString(context,id);
+        }else {
+            //没有启动国际化
+            return getString(id);
         }
     }
 }
