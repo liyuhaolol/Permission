@@ -6,6 +6,7 @@ import android.widget.TextView;
 
 import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
+import spa.lyh.cn.peractivity.dialog.PerDialog;
 
 public class MainActivity extends PermissionActivity {
     private TextView tv;
@@ -24,7 +25,6 @@ public class MainActivity extends PermissionActivity {
         /*askForPermission(REQUIRED_LOAD_METHOD,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 "定位");*/
-
     }
 
 

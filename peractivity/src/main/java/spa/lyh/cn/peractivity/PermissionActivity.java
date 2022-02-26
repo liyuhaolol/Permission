@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.Nullable;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import spa.lyh.cn.peractivity.dialog.PerDialog;
 import spa.lyh.cn.peractivity.util.LanguageUtils;
 
 /**
@@ -53,7 +55,7 @@ public class PermissionActivity extends AppCompatActivity {
     private List<String> missPermission;
 
     //被永久拒绝之后显示的dialog
-    private AlertDialog.Builder builder;
+    private PerDialog perDialog;
 
     private boolean loadMethodFlag;//是否自动加载方法
 
@@ -210,32 +212,21 @@ public class PermissionActivity extends AppCompatActivity {
 
 
     private void initMissingPermissionDialog() {
-        builder = new AlertDialog.Builder(this);
-        builder.setCancelable(false);
-        builder.setTitle(getTrueString(this,R.string.help));
-
-        // 拒绝, 退出应用
-        builder.setNegativeButton(getTrueString(this,R.string.cancal), new DialogInterface.OnClickListener() {
+        perDialog = new PerDialog(this);
+        perDialog.setTitle(getTrueString(this,R.string.help));
+        perDialog.setCancel(getTrueString(this,R.string.cancal));
+        perDialog.setSetting(getTrueString(this,R.string.setting_name));
+        perDialog.setOnCancelClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(View v) {
                 if (loadMethodFlag){
                     permissionRejected();
                 }
             }
         });
-
-        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+        perDialog.setOnSettingClickListener(new View.OnClickListener() {
             @Override
-            public void onCancel(DialogInterface dialog) {
-                if (loadMethodFlag){
-                    permissionRejected();
-                }
-            }
-        });
-
-        builder.setPositiveButton(getTrueString(this,R.string.setting_name), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(View v) {
                 //跳转到，设置的对应界面
                 startAppSettings();
             }
@@ -256,8 +247,8 @@ public class PermissionActivity extends AppCompatActivity {
                 content = content + getTrueString(this,id) + "\n";
             }
         }
-        builder.setMessage(getTrueString(this,R.string.leak)+"\n" + content + getTrueString(this,R.string.go_setting));
-        builder.show();
+        perDialog.setContent(getTrueString(this,R.string.leak)+"\n" + content + getTrueString(this,R.string.go_setting));
+        perDialog.show();
     }
 
     /**
