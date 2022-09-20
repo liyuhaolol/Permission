@@ -28,5 +28,6 @@ public final class ManifestPro {
         public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
         public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
         public static final String WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9 = "android.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9";
+        public static final String POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS";
     }
 }

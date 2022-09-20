@@ -88,6 +88,7 @@ public class PermissionActivity extends AppCompatActivity {
         permissionList.put("android.permission.RECEIVE_MMS",R.string.SMS);
         permissionList.put("android.permission.READ_EXTERNAL_STORAGE",R.string.STORAGE);
         permissionList.put("android.permission.WRITE_EXTERNAL_STORAGE",R.string.STORAGE);
+        permissionList.put("android.permission.POST_NOTIFICATIONS",R.string.NOTIFACATION);
     }
 
     /**
@@ -99,7 +100,7 @@ public class PermissionActivity extends AppCompatActivity {
     public void askForPermission(int code, String... permissions) {
         List<String> realMissPermission = new ArrayList<>();
         boolean flag = true;
-        String per[] = checkAndroid10Permission(permissions);
+        String per[] = checkNeedPermission(permissions);
         for (String permission : per) {
             if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                 realMissPermission.add(permission);
@@ -158,7 +159,7 @@ public class PermissionActivity extends AppCompatActivity {
                 requiredFlag = false;
                 break;
         }
-        List<Integer> ids = selectGroup(per);//判断被拒绝的权限组名称
+        //List<Integer> ids = selectGroup(per);//判断被拒绝的权限组名称
 
         if (permissionFlag) {
             //通过了申请的权限
@@ -182,7 +183,7 @@ public class PermissionActivity extends AppCompatActivity {
                             missPermission = new ArrayList<>();
                         }
                         missPermission.addAll(per);
-                        showMissingPermissionDialog(ids);
+                        showMissingPermissionDialog(per);
                     } else {
                         if (loadMethodFlag) {
                             permissionRejected();
@@ -237,9 +238,10 @@ public class PermissionActivity extends AppCompatActivity {
     /**
      * 显示解释设置dialog
      *
-     * @param ids 权限组名
+     * @param per 权限组名
      */
-    private void showMissingPermissionDialog(List<Integer> ids) {
+    public void showMissingPermissionDialog(List<String> per) {
+        List<Integer> ids = selectGroup(per);
         String content = "";
         //将权限组名字转换为字符串
         if (ids.size() > 0) {
@@ -291,7 +293,7 @@ public class PermissionActivity extends AppCompatActivity {
                 //依然有权限未通过
                 missPermission.clear();
                 missPermission.addAll(per);
-                showMissingPermissionDialog(selectGroup(per));
+                showMissingPermissionDialog(per);
             }else {
                 missPermission.clear();
                 permissionAllowed();
@@ -299,14 +301,20 @@ public class PermissionActivity extends AppCompatActivity {
         }
     }
 
-    private String[] checkAndroid10Permission(String permission[]){
+    private String[] checkNeedPermission(String permission[]){
         List<String> per = Arrays.asList(permission);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             per = new ArrayList<>();
             for (String permi:permission){
                 if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)
                         && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
-                    per.add(permi);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+                        per.add(permi);
+                    }else {
+                        if (!permi.equals(ManifestPro.permission.POST_NOTIFICATIONS)){
+                            per.add(permi);
+                        }
+                    }
                 }
             }
         }else {
