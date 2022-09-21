@@ -7,11 +7,12 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import spa.lyh.cn.peractivity.ChinaPermissionActivity;
 import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
 import spa.lyh.cn.peractivity.dialog.PerDialog;
 
-public class MainActivity extends PermissionActivity {
+public class MainActivity extends ChinaPermissionActivity {
     private TextView tv;
 
     @Override

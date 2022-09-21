@@ -5,7 +5,7 @@ android {
     compileSdkVersion 33
 
     defaultConfig {
-        minSdkVersion 1
+        minSdkVersion 9
         targetSdkVersion 33
         versionCode versions.versionCode
         versionName versions.versionName
