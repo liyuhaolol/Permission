@@ -12,7 +12,7 @@ import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
 import spa.lyh.cn.peractivity.dialog.PerDialog;
 
-public class MainActivity extends ChinaPermissionActivity {
+public class MainActivity extends PermissionActivity {
     private TextView tv;
 
     @Override

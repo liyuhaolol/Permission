@@ -268,6 +268,9 @@ public class PermissionActivity extends AppCompatActivity {
                 showMissingPermissionDialog(per);
             }else {
                 missPermission.clear();
+                if (perDialog != null && perDialog.isShowing()){
+                    perDialog.dismiss();
+                }
                 permissionAllowed();
             }
         }

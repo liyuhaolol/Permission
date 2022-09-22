@@ -32,7 +32,7 @@ import spa.lyh.cn.peractivity.util.PerUtils;
  * vivo，oppo等平台的审核规则为，权限只允许请求一次，用户拒绝以后，不管用户是否勾选不再询问，通常48小时内不允许再次发起请求。
  * 1次权限请求就是硬按iOS的权限请求逻辑来要求Android，本人只能表示无语。Android明明有不在询问选项，非要按照苹果的逻辑来。库克是他们爹。
  *
- * 本Acitivity跟默认的PermissionActivity逻辑保持一致，但是加入了本地持久化，记录权限申请状态。如果1次请求被拒绝，则以后会直接返回权限被拒绝的状态。
+ * 本Acitivity跟默认的PermissionActivity逻辑保持一致，但是加入了本地持久化，记录权限申请状态。如果1次请求被拒绝，48小时内直接返回权限被拒绝的状态。
  * 而不会去判断系统是否真的将此权限拒绝。后续操作需要开发人员自己重写方法去操作。
  *
  * 使用事项，权限是按照权限组来授权的，所以申请权限时，尽量不要同时申请同一权限组的权限，比如
@@ -92,8 +92,9 @@ public class ChinaPermissionActivity extends AppCompatActivity {
         }
         for (int i = 0;i<realMissPermission.size();i++){
             String perName = realMissPermission.get(i);
-            int mark = mSharedPreferences.getInt(perName,0);
-            if (mark != 0){
+            long mark = mSharedPreferences.getLong(perName,0);
+            long time = System.currentTimeMillis();
+            if ((time - mark) <= 172800000){
                 missPerList.add(perName);
             }
         }
@@ -105,9 +106,9 @@ public class ChinaPermissionActivity extends AppCompatActivity {
             for (String perName:missPerList){
                 realMissPermission.remove(perName);
             }
-            for (String perName:realMissPermission){
-                mSharedPreferences.edit().putInt(perName,1).apply();
-            }
+/*            for (String perName:realMissPermission){
+                mSharedPreferences.edit().putLong(perName,System.currentTimeMillis()).apply();
+            }*/
             String[] missPermissions = realMissPermission.toArray(new String[realMissPermission.size()]);
             requestPermission(code, missPermissions);
         }
@@ -176,6 +177,9 @@ public class ChinaPermissionActivity extends AppCompatActivity {
                 //存在被拒绝的权限
                 per.add(permissions[i]);
                 permissionFlag = false;
+                mSharedPreferences.edit().putLong(permissions[i],System.currentTimeMillis()).apply();
+            }else {
+                mSharedPreferences.edit().putLong(permissions[i],0).apply();
             }
         }
         switch (requestCode) {
@@ -322,6 +326,8 @@ public class ChinaPermissionActivity extends AppCompatActivity {
             for (String permission:missPermission){
                 if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                     per.add(permission);
+                }else {
+                    mSharedPreferences.edit().putLong(permission,0).apply();
                 }
             }
             if (per.size() > 0){
@@ -331,6 +337,9 @@ public class ChinaPermissionActivity extends AppCompatActivity {
                 showMissingPermissionDialog(per);
             }else {
                 missPermission.clear();
+                if (perDialog != null && perDialog.isShowing()){
+                    perDialog.dismiss();
+                }
                 permissionAllowed();
             }
         }
