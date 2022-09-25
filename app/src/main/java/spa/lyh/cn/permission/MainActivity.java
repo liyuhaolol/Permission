@@ -1,10 +1,13 @@
 package spa.lyh.cn.permission;
 
 
+import android.Manifest;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import spa.lyh.cn.peractivity.ChinaPermissionActivity;
@@ -21,17 +24,27 @@ public class MainActivity extends PermissionActivity {
         setContentView(R.layout.activity_main);
         tv = findViewById(R.id.tv);
         //请求权限
-        askForPermission(REQUIRED_LOAD_METHOD,
-                ManifestPro.permission.CAMERA,
-                ManifestPro.permission.ACCESS_FINE_LOCATION,
-                ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9,
-                ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10,
-                ManifestPro.permission.POST_NOTIFICATIONS);
+        askForPermission(REQUIRED_LOAD_METHOD,getPermissionList());
         /*askForPermission(REQUIRED_LOAD_METHOD,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 "定位");*/
     }
 
+    private String[] getPermissionList(){
+        List<String> pList = new ArrayList<>();
+        pList.add(ManifestPro.permission.CAMERA);
+        pList.add(ManifestPro.permission.ACCESS_FINE_LOCATION);
+        pList.add(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9);
+        pList.add(ManifestPro.permission.POST_NOTIFICATIONS);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            pList.add(ManifestPro.permission.READ_MEDIA_IMAGES);
+            pList.add(ManifestPro.permission.READ_MEDIA_VIDEO);
+            pList.add(ManifestPro.permission.READ_MEDIA_AUDIO);
+        }else {
+            pList.add(ManifestPro.permission.READ_EXTERNAL_STORAGE);
+        }
+        return pList.toArray(new String[pList.size()]);
+    }
 
     @Override
     public void permissionAllowed() {

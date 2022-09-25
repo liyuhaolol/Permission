@@ -10,6 +10,9 @@
     <string name="SMS">短信</string>
     <string name="STORAGE">存储读写</string>
     <string name="NOTIFACATION">通知</string>
+    <string name="IMAGE">图片</string>
+    <string name="VIDEO">视频</string>
+    <string name="AUDIO">音频</string>
     <string name="help">帮助</string>
     <string name="cancal">取消</string>
     <string name="setting_name">设置</string>

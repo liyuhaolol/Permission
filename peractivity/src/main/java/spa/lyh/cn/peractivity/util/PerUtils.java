@@ -52,6 +52,9 @@ public class PerUtils {
         permissionList.put("android.permission.READ_EXTERNAL_STORAGE",R.string.STORAGE);
         permissionList.put("android.permission.WRITE_EXTERNAL_STORAGE",R.string.STORAGE);
         permissionList.put("android.permission.POST_NOTIFICATIONS",R.string.NOTIFACATION);
+        permissionList.put("android.permission.READ_MEDIA_IMAGES",R.string.IMAGE);
+        permissionList.put("android.permission.READ_MEDIA_VIDEO",R.string.VIDEO);
+        permissionList.put("android.permission.READ_MEDIA_AUDIO",R.string.AUDIO);
 
         return permissionList;
     }
@@ -65,33 +68,19 @@ public class PerUtils {
             per = new ArrayList<>();
             for (String permi:permission){
                 if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)
-                        && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10)
+                        && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)
                             && !permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)){
                     per.add(permi);
 
-                }
-            }
-        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
-            //11
-            per = new ArrayList<>();
-            for (String permi:permission){
-                if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)
-                && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10)){
-                    if (permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)){
-                        per.add(ManifestPro.permission.READ_EXTERNAL_STORAGE);
-                    }else {
-                        per.add(permi);
-                    }
                 }
             }
         }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             //10
             per = new ArrayList<>();
             for (String permi:permission){
-                if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)){
-                    if (permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10)){
-                        per.add(ManifestPro.permission.WRITE_EXTERNAL_STORAGE);
-                    }else if (permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)){
+                if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)
+                        && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
+                    if (permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)){
                         per.add(ManifestPro.permission.READ_EXTERNAL_STORAGE);
                     }else {
                         per.add(permi);
@@ -105,7 +94,7 @@ public class PerUtils {
             for (int i = 0;i<per.size();i++){
                 if (per.get(i).equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)){
                     per.set(i,ManifestPro.permission.READ_PHONE_STATE);
-                }else if (per.get(i).equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10)){
+                }else if (per.get(i).equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
                     per.set(i,ManifestPro.permission.WRITE_EXTERNAL_STORAGE);
                 }else if (per.get(i).equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)){
                     per.set(i,ManifestPro.permission.READ_EXTERNAL_STORAGE);
@@ -114,8 +103,8 @@ public class PerUtils {
         }
         //再处理向下兼容问题
         List<String> pName = new ArrayList<>();
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S){
-            //12
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){
+            //12.1
             for (int i = 0; i< per.size(); i++){
                 if (per.get(i).equals(ManifestPro.permission.POST_NOTIFICATIONS)){
                     //13

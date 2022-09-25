@@ -28,7 +28,10 @@ public final class ManifestPro {
         public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
         public static final String READ_EXTERNAL_STORAGE_BLOW_ANDROID_11 = "android.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11";
         public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
-        public static final String WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10 = "android.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10";
+        public static final String WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9 = "android.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9";
         public static final String POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS";
+        public static final String READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES";
+        public static final String READ_MEDIA_VIDEO = "android.permission.READ_MEDIA_VIDEO";
+        public static final String READ_MEDIA_AUDIO = "android.permission.READ_MEDIA_AUDIO";
     }
 }
