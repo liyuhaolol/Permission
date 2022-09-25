@@ -60,15 +60,13 @@ public class PerUtils {
     public static String[] checkNeedPermission(String permission[]){
         List<String> per = Arrays.asList(permission);
         //先处理向上兼容的权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-            //13
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+            //12
             per = new ArrayList<>();
             for (String permi:permission){
                 if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)
                         && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10)
-                            && !permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)
-                                && !permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE)
-                                    && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE)){
+                            && !permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)){
                     per.add(permi);
 
                 }
