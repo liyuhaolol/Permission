@@ -59,29 +59,78 @@ public class PerUtils {
 
     public static String[] checkNeedPermission(String permission[]){
         List<String> per = Arrays.asList(permission);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+        //先处理向上兼容的权限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            //13
             per = new ArrayList<>();
             for (String permi:permission){
                 if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)
-                        && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-                        per.add(permi);
+                        && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10)
+                            && !permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)
+                                && !permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE)
+                                    && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE)){
+                    per.add(permi);
+
+                }
+            }
+        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            //11
+            per = new ArrayList<>();
+            for (String permi:permission){
+                if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)
+                && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10)){
+                    if (permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)){
+                        per.add(ManifestPro.permission.READ_EXTERNAL_STORAGE);
                     }else {
-                        if (!permi.equals(ManifestPro.permission.POST_NOTIFICATIONS)){
-                            per.add(permi);
-                        }
+                        per.add(permi);
                     }
                 }
             }
+        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            //10
+            per = new ArrayList<>();
+            for (String permi:permission){
+                if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)){
+                    if (permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10)){
+                        per.add(ManifestPro.permission.WRITE_EXTERNAL_STORAGE);
+                    }else if (permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)){
+                        per.add(ManifestPro.permission.READ_EXTERNAL_STORAGE);
+                    }else {
+                        per.add(permi);
+                    }
+
+
+                }
+            }
         }else {
+            //<=9
             for (int i = 0;i<per.size();i++){
                 if (per.get(i).equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)){
                     per.set(i,ManifestPro.permission.READ_PHONE_STATE);
-                }else if (per.get(i).equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
+                }else if (per.get(i).equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_10)){
                     per.set(i,ManifestPro.permission.WRITE_EXTERNAL_STORAGE);
+                }else if (per.get(i).equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)){
+                    per.set(i,ManifestPro.permission.READ_EXTERNAL_STORAGE);
                 }
             }
         }
+        //再处理向下兼容问题
+        List<String> pName = new ArrayList<>();
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S){
+            //12
+            for (int i = 0; i< per.size(); i++){
+                if (per.get(i).equals(ManifestPro.permission.POST_NOTIFICATIONS)){
+                    //13
+                    pName.add(ManifestPro.permission.POST_NOTIFICATIONS);
+                }
+            }
+        }
+
+        //移除掉对应权限
+        for (String n:pName){
+            per.remove(n);
+        }
+
         return per.toArray(new String[per.size()]);
     }
 }
