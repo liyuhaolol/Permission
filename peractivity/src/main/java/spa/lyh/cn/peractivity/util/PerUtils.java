@@ -61,7 +61,7 @@ public class PerUtils {
 
 
     public static String[] checkNeedPermission(String permission[]){
-        List<String> per = Arrays.asList(permission);
+        List<String> per = new ArrayList<>(Arrays.asList(permission));
         //先处理向上兼容的权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
             //12

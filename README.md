@@ -2,6 +2,10 @@
 
 PermissionActivity作为父类的权限申请框架
 
+## 1.1.4更新
+
+- 修复UnsupportedOperationException的问题
+
 ## 1.0.9更新
 
 - 修复手动授权后，授权弹窗不会消失的问题
