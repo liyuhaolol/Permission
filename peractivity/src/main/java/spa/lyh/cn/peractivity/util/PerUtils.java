@@ -61,11 +61,10 @@ public class PerUtils {
 
 
     public static String[] checkNeedPermission(String permission[]){
-        List<String> per = new ArrayList<>(Arrays.asList(permission));
+        ArrayList<String> per = new ArrayList<>();
         //先处理向上兼容的权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
             //12
-            per = new ArrayList<>();
             for (String permi:permission){
                 if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)
                         && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)
@@ -76,7 +75,6 @@ public class PerUtils {
             }
         }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             //10
-            per = new ArrayList<>();
             for (String permi:permission){
                 if (!permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)
                         && !permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
@@ -91,13 +89,15 @@ public class PerUtils {
             }
         }else {
             //<=9
-            for (int i = 0;i<per.size();i++){
-                if (per.get(i).equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)){
-                    per.set(i,ManifestPro.permission.READ_PHONE_STATE);
-                }else if (per.get(i).equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
-                    per.set(i,ManifestPro.permission.WRITE_EXTERNAL_STORAGE);
-                }else if (per.get(i).equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)){
-                    per.set(i,ManifestPro.permission.READ_EXTERNAL_STORAGE);
+            for (String permi:permission){
+                if (permi.equals(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9)){
+                    per.add(ManifestPro.permission.READ_PHONE_STATE);
+                }else if (permi.equals(ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9)){
+                    per.add(ManifestPro.permission.WRITE_EXTERNAL_STORAGE);
+                }else if (permi.equals(ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11)){
+                    per.add(ManifestPro.permission.READ_EXTERNAL_STORAGE);
+                }else {
+                    per.add(permi);
                 }
             }
         }

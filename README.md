@@ -2,6 +2,10 @@
 
 PermissionActivity作为父类的权限申请框架
 
+## 1.1.5更新
+
+- 修改写法彻底避免出现UnsupportedOperationException
+
 ## 1.1.4更新
 
 - 修复UnsupportedOperationException的问题
