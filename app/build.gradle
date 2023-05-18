@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace 'spa.lyh.cn.permission'
+
     compileSdkVersion 33
 
     defaultConfig {

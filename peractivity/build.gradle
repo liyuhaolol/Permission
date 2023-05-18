@@ -1,7 +1,9 @@
 apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
+//apply plugin: 'maven-publish'
 
 android {
+    namespace 'spa.lyh.cn.peractivity'
+
     compileSdkVersion 33
 
     defaultConfig {
@@ -26,6 +28,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:${versions.appcompat}"
 }
 
+/*
 afterEvaluate {
     publishing {
         publications{
@@ -37,4 +40,4 @@ afterEvaluate {
             }
         }
     }
-}
+}*/
