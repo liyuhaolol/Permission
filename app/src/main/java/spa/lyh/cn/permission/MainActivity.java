@@ -1,19 +1,15 @@
 package spa.lyh.cn.permission;
 
 
-import android.Manifest;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import spa.lyh.cn.peractivity.ChinaPermissionActivity;
 import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
-import spa.lyh.cn.peractivity.dialog.PerDialog;
 
 public class MainActivity extends PermissionActivity {
     private TextView tv;
