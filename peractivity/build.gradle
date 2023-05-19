@@ -1,5 +1,7 @@
-apply plugin: 'com.android.library'
-//apply plugin: 'maven-publish'
+plugins{
+    id 'com.android.library'
+    id 'maven-publish'
+}
 
 android {
     namespace 'spa.lyh.cn.peractivity'
@@ -20,6 +22,12 @@ android {
         }
     }
 
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
+
 }
 
 dependencies {
@@ -28,7 +36,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:${versions.appcompat}"
 }
 
-/*
+
 afterEvaluate {
     publishing {
         publications{
@@ -40,4 +48,4 @@ afterEvaluate {
             }
         }
     }
-}*/
+}
