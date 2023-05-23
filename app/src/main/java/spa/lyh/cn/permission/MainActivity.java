@@ -8,6 +8,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import spa.lyh.cn.peractivity.ChinaPermissionActivity;
 import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
 
