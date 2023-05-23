@@ -1,6 +1,10 @@
 # 权限申请框架
 
-PermissionActivity作为父类的权限申请框架
+PermissionActivity（ChinaPermissionActivity）作为父类的权限申请框架
+
+## 1.1.7更新
+
+- 将代码全部转为kotlin，战未来
 
 ## 1.1.5更新
 
