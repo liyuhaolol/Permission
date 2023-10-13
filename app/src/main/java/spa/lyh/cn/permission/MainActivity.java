@@ -21,7 +21,7 @@ public class MainActivity extends PermissionActivity {
     private TextView tv;
     private Button btn_io;
 
-    private int sign = 0;//0为app默认发起的那些请求，1为模拟app相册发起的请求，2为相册重新发起的文件请求
+    private int sign = 0;//0为app默认发起的那些请求，1为模拟app相册发起的请求
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
