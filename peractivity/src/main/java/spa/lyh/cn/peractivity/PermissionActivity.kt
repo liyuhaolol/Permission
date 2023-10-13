@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import androidx.annotation.StringRes
@@ -30,6 +31,7 @@ import spa.lyh.cn.peractivity.util.PerUtils.getPermissionNameList
  */
 open class PermissionActivity : AppCompatActivity() {
     private var missPermission: MutableList<String>? = null
+    private var hasReadMediaVisualUserSelected = false//是否请求了这个权限
 
     //被永久拒绝之后显示的dialog
     private lateinit var perDialog: PerDialog
@@ -57,10 +59,19 @@ open class PermissionActivity : AppCompatActivity() {
      * @param permissions 不定长数组
      */
     fun askForPermission(code: Int, vararg permissions: String) {
+        hasReadMediaVisualUserSelected = false//重置为false
         val realMissPermission: MutableList<String> = ArrayList()
         var flag = true
         val per = checkNeedPermission(permissions as Array<String>)
         for (permission in per) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                //14以上需要判断新权限
+                if (permission == ManifestPro.permission.READ_MEDIA_VISUAL_USER_SELECTED){
+                    //用户发起了本权限请求，需要记录
+                    hasReadMediaVisualUserSelected = true
+                }
+            }
+            //判断权限是否已经被授权
             if (ContextCompat.checkSelfPermission(
                     this,
                     permission
@@ -92,19 +103,48 @@ open class PermissionActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         var permissionFlag = true //权限是否全部通过
         var dialogFlag = false //是否显示设置dialog
         var requiredFlag = false //是否为项目必须的权限
         val per = ArrayList<String>() //保存被拒绝的权限列表
+        var allowJump = false//是否允许忽略图片和视频权限的拒绝情况
         initMissingPermissionDialog()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
+            //14
+            if (hasReadMediaVisualUserSelected){
+                var found = false
+                for ((i,permission) in permissions.withIndex()) {
+                    if (permission == ManifestPro.permission.READ_MEDIA_VISUAL_USER_SELECTED){
+                        //匹配此权限
+                        found = true
+                        if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                            //同意权限
+                            allowJump = true
+                        }
+                    }
+                }
+                if (!found){
+                    //说明已授权
+                    allowJump = true
+                }
+            }
+        }
         for (i in grantResults.indices) {
             if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                 //存在被拒绝的权限
-                per.add(permissions[i])
-                permissionFlag = false
+                if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) && allowJump){
+                    if (permissions[i] != ManifestPro.permission.READ_MEDIA_IMAGES &&
+                        permissions[i] != ManifestPro.permission.READ_MEDIA_VIDEO){
+                        per.add(permissions[i])
+                        permissionFlag = false
+                    }
+                }else{
+                    per.add(permissions[i])
+                    permissionFlag = false
+                }
             }
         }
         when (requestCode) {

@@ -7,11 +7,11 @@ plugins{
 android {
     namespace 'spa.lyh.cn.peractivity'
 
-    compileSdkVersion 33
+    compileSdk 34
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 33
+        targetSdk 34
 
         consumerProguardFiles 'consumer-rules.pro'
     }

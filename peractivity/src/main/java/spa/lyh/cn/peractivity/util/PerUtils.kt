@@ -51,6 +51,7 @@ object PerUtils {
         permissionList["android.permission.READ_MEDIA_IMAGES"] = R.string.IMAGE
         permissionList["android.permission.READ_MEDIA_VIDEO"] = R.string.VIDEO
         permissionList["android.permission.READ_MEDIA_AUDIO"] = R.string.AUDIO
+        permissionList["android.permission.READ_MEDIA_VISUAL_USER_SELECTED"] = R.string.MEDIA_MODE
         return permissionList
     }
 
@@ -95,8 +96,9 @@ object PerUtils {
                 }
             }
         }
+        //底层库不应该处理这个问题，向下兼容应该开发者自己判断android版本，故注释掉
         //再处理向下兼容问题
-        val pName: MutableList<String> = ArrayList()
+/*        val pName: MutableList<String> = ArrayList()
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
             //12.1
             for (i in per.indices) {
@@ -110,7 +112,21 @@ object PerUtils {
         //移除掉对应权限
         for (n in pName) {
             per.remove(n)
-        }
+        }*/
         return per.toTypedArray()
     }
+
+
+    /**
+     * 判断Android14以上是否需要进行忽略权限
+     */
+/*    @JvmStatic
+    fun permissionAndroid14Sync():Boolean{
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+
+        }else{
+            //如果不大于Android14则不需要强制忽略
+            false
+        }
+    }*/
 }

@@ -1,5 +1,8 @@
 package spa.lyh.cn.peractivity
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+
 object ManifestPro {
     object permission{
         const val READ_CALENDAR = "android.permission.READ_CALENDAR"
@@ -29,9 +32,17 @@ object ManifestPro {
         const val READ_EXTERNAL_STORAGE_BLOW_ANDROID_11 = "android.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11"
         const val WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE"
         const val WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9 = "android.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9"
+        //Android13新引入权限
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         const val POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS"
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         const val READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES"
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         const val READ_MEDIA_VIDEO = "android.permission.READ_MEDIA_VIDEO"
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         const val READ_MEDIA_AUDIO = "android.permission.READ_MEDIA_AUDIO"
+        //Android14新引入权限
+        @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+        const val READ_MEDIA_VISUAL_USER_SELECTED = "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
     }
 }
