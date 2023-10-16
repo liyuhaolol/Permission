@@ -1,8 +1,11 @@
 package spa.lyh.cn.peractivity.util
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import spa.lyh.cn.peractivity.ManifestPro
 import spa.lyh.cn.peractivity.R
+
 
 object PerUtils {
     //必须被允许，且自动执行授权后方法
@@ -116,17 +119,4 @@ object PerUtils {
         return per.toTypedArray()
     }
 
-
-    /**
-     * 判断Android14以上是否需要进行忽略权限
-     */
-/*    @JvmStatic
-    fun permissionAndroid14Sync():Boolean{
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-
-        }else{
-            //如果不大于Android14则不需要强制忽略
-            false
-        }
-    }*/
 }

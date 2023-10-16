@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import androidx.annotation.StringRes
@@ -42,6 +43,7 @@ open class ChinaPermissionActivity : AppCompatActivity() {
     private val missPerList = ArrayList<String>()
     private var loadMethodFlag = false//是否自动加载方法
     private var missPermission: MutableList<String>? = null
+    private var hasReadMediaVisualUserSelected = false//是否请求了这个权限
 
     //被永久拒绝之后显示的dialog
     private var perDialog: PerDialog? = null
@@ -68,11 +70,20 @@ open class ChinaPermissionActivity : AppCompatActivity() {
      * @param permissions 不定长数组
      */
     fun askForPermission(code: Int, vararg permissions: String?) {
+        hasReadMediaVisualUserSelected = false//重置为false
         missPerList.clear()
         val realMissPermission: MutableList<String> = ArrayList()
         var flag = true
         val per = checkNeedPermission(permissions as Array<String>)
         for (permission in per) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                //14以上需要判断新权限
+                if (permission == ManifestPro.permission.READ_MEDIA_VISUAL_USER_SELECTED){
+                    //用户发起了本权限请求，需要记录
+                    hasReadMediaVisualUserSelected = true
+                }
+            }
+            //判断权限是否已经被授权
             if (ContextCompat.checkSelfPermission(
                     this,
                     permission
@@ -89,7 +100,7 @@ open class ChinaPermissionActivity : AppCompatActivity() {
             val perName = realMissPermission[i]
             val mark = mSharedPreferences!!.getLong(perName, 0)
             val time = System.currentTimeMillis()
-            if (time - mark <= 172800000) {
+            if (time - mark <= 172800000) {//权限请求间隔不能小于48小时
                 missPerList.add(perName)
             }
         }
@@ -171,15 +182,50 @@ open class ChinaPermissionActivity : AppCompatActivity() {
         var permissionFlag = missPerList.size <= 0 //权限是否全部通过
         var requiredFlag = false //是否为项目必须的权限
         val per = ArrayList<String>() //保存被拒绝的权限列表
+        var allowJump = false//是否允许忽略图片和视频权限的拒绝情况
         initMissingPermissionDialog()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
+            //14
+            if (hasReadMediaVisualUserSelected){
+                var found = false
+                for ((i,permission) in permissions.withIndex()) {
+                    if (permission == ManifestPro.permission.READ_MEDIA_VISUAL_USER_SELECTED){
+                        //匹配此权限
+                        found = true
+                        if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                            //同意权限
+                            allowJump = true
+                        }
+                    }
+                }
+                if (!found){
+                    //说明已授权
+                    allowJump = true
+                }
+            }
+        }
         for (i in grantResults.indices) {
             if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                 //存在被拒绝的权限
-                per.add(permissions[i])
-                permissionFlag = false
-                mSharedPreferences!!.edit().putLong(permissions[i], System.currentTimeMillis())
-                    .apply()
+                if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) && allowJump){
+                    if (permissions[i] != ManifestPro.permission.READ_MEDIA_IMAGES &&
+                        permissions[i] != ManifestPro.permission.READ_MEDIA_VIDEO){
+                        per.add(permissions[i])
+                        permissionFlag = false
+                        mSharedPreferences!!.edit().putLong(permissions[i], System.currentTimeMillis())
+                            .apply()
+                    }else{
+                        //将这两个权限的请求时间记录清除，重置为0
+                        mSharedPreferences!!.edit().putLong(permissions[i], 0).apply()
+                    }
+                }else{
+                    per.add(permissions[i])
+                    permissionFlag = false
+                    mSharedPreferences!!.edit().putLong(permissions[i], System.currentTimeMillis())
+                        .apply()
+                }
             } else {
+                //权限通过了，重置为0
                 mSharedPreferences!!.edit().putLong(permissions[i], 0).apply()
             }
         }

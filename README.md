@@ -2,6 +2,10 @@
 
 PermissionActivity（ChinaPermissionActivity）作为父类的权限申请框架
 
+## 1.2.0更新
+
+- 全面适配`Android14`的`READ_MEDIA_VISUAL_USER_SELECTED`权限，解决授权后依旧显示权限拒绝的问题
+
 ## 1.1.7更新
 
 - 将代码全部转为kotlin，战未来

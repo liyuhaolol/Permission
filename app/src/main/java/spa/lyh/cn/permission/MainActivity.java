@@ -2,9 +2,11 @@ package spa.lyh.cn.permission;
 
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -17,7 +19,7 @@ import spa.lyh.cn.peractivity.ChinaPermissionActivity;
 import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
 
-public class MainActivity extends PermissionActivity {
+public class MainActivity extends ChinaPermissionActivity {
     private TextView tv;
     private Button btn_io;
 
@@ -42,6 +44,7 @@ public class MainActivity extends PermissionActivity {
                 askForPermission(REQUIRED_LOAD_METHOD,getIOPermissionList());
             }
         });
+
     }
 
     private String[] getPermissionList(){
@@ -96,4 +99,5 @@ public class MainActivity extends PermissionActivity {
     public void showMissingPermissionDialog(List<String> per) {
         Toast.makeText(this,"这里显示权限被拒绝dialog",Toast.LENGTH_SHORT).show();
     }*/
+
 }
