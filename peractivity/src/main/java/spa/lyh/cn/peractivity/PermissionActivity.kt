@@ -86,7 +86,26 @@ open class PermissionActivity : AppCompatActivity() {
             requestPermission(code, *missPermissions)
         }
         if (flag) {
-            permissionAllowed()
+            when (code) {
+                ChinaPermissionActivity.REQUIRED_LOAD_METHOD -> {
+                    loadMethodFlag = true
+                }
+
+                ChinaPermissionActivity.REQUIRED_ONLY_REQUEST -> {
+                    loadMethodFlag = false
+                }
+
+                ChinaPermissionActivity.NOT_REQUIRED_LOAD_METHOD -> {
+                    loadMethodFlag = true
+                }
+
+                ChinaPermissionActivity.NOT_REQUIRED_ONLY_REQUEST -> {
+                    loadMethodFlag = false
+                }
+            }
+            if (loadMethodFlag){
+                permissionAllowed()
+            }
         }
     }
 

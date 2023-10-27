@@ -42,11 +42,12 @@ open class ChinaPermissionActivity : AppCompatActivity() {
     private var mSharedPreferences: SharedPreferences? = null
     private val missPerList = ArrayList<String>()
     private var loadMethodFlag = false//是否自动加载方法
-    private var missPermission: MutableList<String>? = null
+    private var missPermission: ArrayList<String>? = null
     private var hasReadMediaVisualUserSelected = false//是否请求了这个权限
 
     //被永久拒绝之后显示的dialog
     private var perDialog: PerDialog? = null
+    private var perCheckDialog: PerDialog? = null
 
     companion object {
         //必须被允许，且自动执行授权后方法
@@ -119,7 +120,103 @@ open class ChinaPermissionActivity : AppCompatActivity() {
             requestPermission(code, *missPermissions)
         }
         if (flag) {
-            permissionAllowed()
+            when (code) {
+                REQUIRED_LOAD_METHOD -> {
+                    loadMethodFlag = true
+                }
+
+                REQUIRED_ONLY_REQUEST -> {
+                    loadMethodFlag = false
+                }
+
+                NOT_REQUIRED_LOAD_METHOD -> {
+                    loadMethodFlag = true
+                }
+
+                NOT_REQUIRED_ONLY_REQUEST -> {
+                    loadMethodFlag = false
+                }
+            }
+            if (loadMethodFlag){
+                permissionAllowed()
+            }
+        }
+    }
+
+    /**
+     * 仅仅检查对应的权限，不进行权限请求，这个需求似乎仅仅在中国的适配权限才需要检查
+     * check方法不响应METHOD是否加载的选项，因为不加载没有意义
+     */
+    fun checkPermissions(code: Int, vararg permissions: String) {
+        var hasPassMediaVisualUserSelected = false//是否已经授权本权限
+        missPerList.clear()
+        val realMissPermission: ArrayList<String> = ArrayList()
+        var flag = true
+        if (mSharedPreferences == null) {
+            mSharedPreferences = getSharedPreferences(FILLNAME, MODE_PRIVATE)
+        }
+        for (permission in permissions) {
+            var isIt = false//是他
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                //14以上需要判断新权限
+                if (permission == ManifestPro.permission.READ_MEDIA_VISUAL_USER_SELECTED){
+                    //用户发起了本权限请求，需要记录
+                    isIt = true
+                }
+            }
+            //判断权限是否已经被授权
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    permission
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                val mark = mSharedPreferences!!.getLong(permission, -1L)
+                if (mark != -1L){
+                    //代表权限曾被请求过
+                    realMissPermission.add(permission)
+                }
+            }else{
+                //已被授权
+                if (isIt){
+                    hasPassMediaVisualUserSelected = true
+                }
+            }
+        }
+        for (i in realMissPermission.indices) {
+            val perName = realMissPermission[i]
+            val mark = mSharedPreferences!!.getLong(perName, 0)
+            val time = System.currentTimeMillis()
+            if (time - mark <= 172800000) {//权限请求间隔不能小于48小时
+                missPerList.add(perName)
+                flag = false
+            }
+        }
+        if (missPerList.size > 0) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                //14以上需要判断新权限
+                if(hasPassMediaVisualUserSelected){
+                    //这个权限被通过了，所以需要忽略IMAGE和VIDEO权限
+                    val iterator = missPerList.iterator()
+                    while (iterator.hasNext()) {
+                        val item = iterator.next()
+                        if (item == ManifestPro.permission.READ_MEDIA_IMAGES || item == ManifestPro.permission.READ_MEDIA_VIDEO) {
+                            iterator.remove()
+                        }
+                    }
+                }
+            }
+            if (missPerList.size > 0){
+                //依旧大于0，存在被拒绝的权限
+                makeRejectCheck(code,missPerList)
+            }else{
+                //没有被拒绝的权限了
+                permissionCheck48HPass()
+            }
+
+        }
+
+        if (flag) {
+            permissionCheck48HPass()
         }
     }
 
@@ -160,6 +257,39 @@ open class ChinaPermissionActivity : AppCompatActivity() {
             if (loadMethodFlag) {
                 permissionRejected()
             }
+        }
+    }
+    private fun makeRejectCheck(code: Int,permissions: ArrayList<String>) {
+        initMissingPermissionCheckDialog(permissions)
+        var requiredFlag = false //是否为项目必须的权限
+        when (code) {
+            REQUIRED_LOAD_METHOD -> {
+                requiredFlag = true
+            }
+
+            REQUIRED_ONLY_REQUEST -> {
+                requiredFlag = true
+            }
+
+            NOT_REQUIRED_LOAD_METHOD -> {
+                requiredFlag = false
+            }
+
+            NOT_REQUIRED_ONLY_REQUEST -> {
+                requiredFlag = false
+            }
+        }
+        if (requiredFlag) {
+            //显示缺少权限，并解释为何需要这个权限
+            if (missPermission != null) {
+                missPermission!!.clear()
+            } else {
+                missPermission = ArrayList()
+            }
+            missPermission!!.addAll(missPerList)
+            showMissingPermissionCheckDialog(missPermission!!)
+        } else {
+            permissionCheck48HDenied(missPermission!!)
         }
     }
 
@@ -252,9 +382,13 @@ open class ChinaPermissionActivity : AppCompatActivity() {
         }
         //List<Integer> ids = selectGroup(per);//判断被拒绝的权限组名称
         if (permissionFlag) {
-            //通过了申请的权限
-            if (loadMethodFlag) {
-                permissionAllowed() //权限通过，执行对应方法
+            //通过了申请的权限，但是存在可能得48小时拒绝权限，所以这里要额外判断
+            if (missPerList.size > 0){
+                makeReject(requestCode)
+            }else{
+                if (loadMethodFlag) {
+                    permissionAllowed() //权限通过，执行对应方法
+                }
             }
         } else {
             if (requiredFlag) {
@@ -294,6 +428,20 @@ open class ChinaPermissionActivity : AppCompatActivity() {
             }
         }
     }
+    private fun initMissingPermissionCheckDialog(permissions: ArrayList<String>) {
+        if (perCheckDialog == null) {
+            perCheckDialog = PerDialog(this)
+            perCheckDialog!!.setTitle(getTrueString(this, R.string.help))
+            perCheckDialog!!.setCancel(getTrueString(this, R.string.cancal))
+            perCheckDialog!!.setSetting(getTrueString(this, R.string.setting_name))
+            perCheckDialog!!.setOnCancelClickListener {
+                permissionCheck48HDenied(permissions)
+            }
+            perCheckDialog!!.setOnSettingClickListener { //跳转到，设置的对应界面
+                startAppSettings()
+            }
+        }
+    }
 
     /**
      * 给子类提供重写的成功接口
@@ -304,6 +452,16 @@ open class ChinaPermissionActivity : AppCompatActivity() {
      * 给子类提供重写的失败接口
      */
     open fun permissionRejected() {}
+
+    /**
+     * 给子类提供重写的检查成功接口
+     */
+    open fun permissionCheck48HPass() {}
+
+    /**
+     * 给子类提供重写的检查失败接口
+     */
+    open fun permissionCheck48HDenied(permissions: ArrayList<String>) {}
 
     /**
      * 显示解释设置dialog
@@ -321,6 +479,18 @@ open class ChinaPermissionActivity : AppCompatActivity() {
         }
         perDialog!!.setContent("${getTrueString(this, R.string.leak)}\n$content${getTrueString(this, R.string.go_setting)}")
         perDialog!!.show()
+    }
+    fun showMissingPermissionCheckDialog(per: List<String>) {
+        val ids = selectGroup(per)
+        var content = ""
+        //将权限组名字转换为字符串
+        if (ids.size > 0) {
+            for (id in ids) {
+                content = "$content${getTrueString(this,id)}\n"
+            }
+        }
+        perCheckDialog!!.setContent("${getTrueString(this, R.string.leak)}\n$content${getTrueString(this, R.string.go_setting)}")
+        perCheckDialog!!.show()
     }
 
     /**

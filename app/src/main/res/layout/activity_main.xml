@@ -27,5 +27,11 @@
             android:layout_height="wrap_content"
             android:text="模拟相册权限请求"
             android:layout_marginTop="50dp"/>
+        <Button
+            android:id="@+id/btn_io_check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="检查相册相关权限状态"
+            android:layout_marginTop="50dp"/>
     </LinearLayout>
 </RelativeLayout>

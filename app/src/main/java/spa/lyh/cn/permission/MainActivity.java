@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +23,7 @@ import spa.lyh.cn.peractivity.PermissionActivity;
 
 public class MainActivity extends ChinaPermissionActivity {
     private TextView tv;
-    private Button btn_io;
+    private Button btn_io,btn_io_check;
 
     private int sign = 0;//0为app默认发起的那些请求，1为模拟app相册发起的请求
 
@@ -31,6 +33,7 @@ public class MainActivity extends ChinaPermissionActivity {
         setContentView(R.layout.activity_main);
         tv = findViewById(R.id.tv);
         btn_io = findViewById(R.id.btn_io);
+        btn_io_check = findViewById(R.id.btn_io_check);
         //请求权限
         askForPermission(REQUIRED_LOAD_METHOD,getPermissionList());
         /*askForPermission(REQUIRED_LOAD_METHOD,
@@ -42,6 +45,12 @@ public class MainActivity extends ChinaPermissionActivity {
             public void onClick(View view) {
                 sign = 1;
                 askForPermission(REQUIRED_LOAD_METHOD,getIOPermissionList());
+            }
+        });
+        btn_io_check.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                checkPermissions(REQUIRED_LOAD_METHOD,getIOPermissionList());
             }
         });
 
@@ -95,9 +104,17 @@ public class MainActivity extends ChinaPermissionActivity {
         }
     }
 
-/*    @Override
-    public void showMissingPermissionDialog(List<String> per) {
-        Toast.makeText(this,"这里显示权限被拒绝dialog",Toast.LENGTH_SHORT).show();
-    }*/
 
+    @Override
+    public void permissionCheck48HPass() {
+        Toast.makeText(this,"权限检查通过",Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void permissionCheck48HDenied(@NonNull ArrayList<String> permissions) {
+        Toast.makeText(this,"权限检查不通过",Toast.LENGTH_SHORT).show();
+        for(String per:permissions){
+            Log.e("qwer",per);
+        }
+    }
 }
