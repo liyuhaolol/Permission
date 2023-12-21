@@ -50,7 +50,6 @@ open class PermissionActivity : AppCompatActivity() {
         const val NOT_REQUIRED_ONLY_REQUEST = PerUtils.NOT_REQUIRED_ONLY_REQUEST
         private const val SETTING_REQUEST = PerUtils.SETTING_REQUEST
         private var permissionList: HashMap<String, Int> = getPermissionNameList()
-        private var rejectPerList:ArrayList<String> = arrayListOf()//被检查出来的永久拒绝的权限
 
     }
 
@@ -60,7 +59,6 @@ open class PermissionActivity : AppCompatActivity() {
      * @param permissions 不定长数组
      */
     fun askForPermission(code: Int, vararg permissions: String) {
-        rejectPerList.clear()//重置list
         hasReadMediaVisualUserSelected = false//重置为false
         val realMissPermission: MutableList<String> = ArrayList()//这个是真正要去请求的权限
         val per = checkNeedPermission(permissions as Array<String>)//将传入的权限进行过滤，去掉一些特殊无用权限
@@ -75,20 +73,14 @@ open class PermissionActivity : AppCompatActivity() {
             //判断权限是否已经被授权
             if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED
             ) {
-                Log.e("qwer","没有权限")
                 realMissPermission.add(permission)
             }
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                //当前权限被设置了"不在询问",永远不会弹出进入这里，将dialog显示标志设为true
-                Log.e("qwer","永久拒绝")
-            }
-            /////
         }
         if (realMissPermission.size > 0) {
             //确实存在要请求的权限，则发起请求
             val missPermissions = realMissPermission.toTypedArray()
-            requestPermission(code, *missPermissions)
             requestPermissionProceed()
+            requestPermission(code, *missPermissions)
         }else{
             //没有要发起请求的权限，则按照方案进行回调
             when (code) {
@@ -124,11 +116,7 @@ open class PermissionActivity : AppCompatActivity() {
         ActivityCompat.requestPermissions(this, permissions, code)
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray,
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray, ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         var permissionFlag = true //权限是否全部通过
         var dialogFlag = false //是否显示设置dialog
@@ -137,7 +125,7 @@ open class PermissionActivity : AppCompatActivity() {
         var allowJump = false//是否允许忽略图片和视频权限的拒绝情况
         initMissingPermissionDialog()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
-            //14
+            //14下对特殊权限，强制判断是否可以跳过
             if (hasReadMediaVisualUserSelected){
                 var found = false
                 for ((i,permission) in permissions.withIndex()) {
@@ -195,6 +183,7 @@ open class PermissionActivity : AppCompatActivity() {
         //List<Integer> ids = selectGroup(per);//判断被拒绝的权限组名称
         if (permissionFlag) {
             //通过了申请的权限
+            requestPermissionOver()
             if (loadMethodFlag) {
                 permissionAllowed() //权限通过，执行对应方法
             }
@@ -221,6 +210,7 @@ open class PermissionActivity : AppCompatActivity() {
                         missPermission!!.addAll(per)
                         showMissingPermissionDialog(per)
                     } else {
+                        requestPermissionOver()
                         if (loadMethodFlag) {
                             permissionRejected()
                         }
@@ -228,6 +218,7 @@ open class PermissionActivity : AppCompatActivity() {
                 }
             } else {
                 Log.e("Permission:", "Permission had been rejected")
+                requestPermissionOver()
                 if (loadMethodFlag) {
                     permissionRejected()
                 }
@@ -259,11 +250,13 @@ open class PermissionActivity : AppCompatActivity() {
         perDialog.setCancel(getTrueString(this, R.string.cancal))
         perDialog.setSetting(getTrueString(this, R.string.setting_name))
         perDialog.setOnCancelClickListener {
+            requestPermissionOver()
             if (loadMethodFlag) {
                 permissionRejected()
             }
         }
         perDialog.setOnSettingClickListener { //跳转到，设置的对应界面
+            requestPermissionOver()
             startAppSettings()
         }
     }

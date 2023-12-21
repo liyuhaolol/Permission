@@ -21,7 +21,7 @@ import spa.lyh.cn.peractivity.ChinaPermissionActivity;
 import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
 
-public class MainActivity extends PermissionActivity {
+public class MainActivity extends ChinaPermissionActivity {
     private TextView tv;
     private Button btn_io,btn_io_check;
 
@@ -47,12 +47,12 @@ public class MainActivity extends PermissionActivity {
                 askForPermission(REQUIRED_LOAD_METHOD,getIOPermissionList());
             }
         });
-/*        btn_io_check.setOnClickListener(new View.OnClickListener() {
+        btn_io_check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 checkPermissions(REQUIRED_LOAD_METHOD,getIOPermissionList());
             }
-        });*/
+        });
 
     }
 
@@ -86,8 +86,9 @@ public class MainActivity extends PermissionActivity {
 
     @Override
     public void permissionAllowed() {
+        Log.e("qwer","获取所有权限成功");
         if (sign == 0){
-            tv.setText("所有获取权限成功");
+            tv.setText("获取所有权限成功");
         }else if (sign == 1){
             Intent intent = new Intent(this,PhotoActivity.class);
             startActivity(intent);
@@ -97,6 +98,7 @@ public class MainActivity extends PermissionActivity {
 
     @Override
     public void permissionRejected() {
+        Log.e("qwer","获取某些权限失败");
         if (sign == 0){
             tv.setText("获取某些权限失败");
         }else if (sign == 1){
@@ -104,8 +106,19 @@ public class MainActivity extends PermissionActivity {
         }
     }
 
+    @Override
+    public void requestPermissionProceed() {
+        super.requestPermissionProceed();
+        Log.e("qwer","发起了权限请求");
+    }
 
-/*    @Override
+    @Override
+    public void requestPermissionOver() {
+        super.requestPermissionOver();
+        Log.e("qwer","结束了权限请求");
+    }
+
+        @Override
     public void permissionCheck48HPass() {
         Toast.makeText(this,"权限检查通过",Toast.LENGTH_SHORT).show();
     }
@@ -116,5 +129,5 @@ public class MainActivity extends PermissionActivity {
         for(String per:permissions){
             Log.e("qwer",per);
         }
-    }*/
+    }
 }

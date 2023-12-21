@@ -113,10 +113,11 @@ open class ChinaPermissionActivity : AppCompatActivity() {
             for (perName in missPerList) {
                 realMissPermission.remove(perName)
             }
-            /*            for (String perName:realMissPermission){
+/*            for (String perName:realMissPermission){
                 mSharedPreferences.edit().putLong(perName,System.currentTimeMillis()).apply();
             }*/
             val missPermissions = realMissPermission.toTypedArray()
+            requestPermissionProceed()
             requestPermission(code, *missPermissions)
         }
         if (flag) {
@@ -254,6 +255,7 @@ open class ChinaPermissionActivity : AppCompatActivity() {
             missPermission!!.addAll(missPerList)
             showMissingPermissionDialog(missPermission!!)
         } else {
+            requestPermissionOver()
             if (loadMethodFlag) {
                 permissionRejected()
             }
@@ -386,6 +388,7 @@ open class ChinaPermissionActivity : AppCompatActivity() {
             if (missPerList.size > 0){
                 makeReject(requestCode)
             }else{
+                requestPermissionOver()
                 if (loadMethodFlag) {
                     permissionAllowed() //权限通过，执行对应方法
                 }
@@ -405,6 +408,7 @@ open class ChinaPermissionActivity : AppCompatActivity() {
                 }
             } else {
                 Log.e("Permission:", "Permission had been rejected")
+                requestPermissionOver()
                 if (loadMethodFlag) {
                     permissionRejected()
                 }
@@ -419,11 +423,13 @@ open class ChinaPermissionActivity : AppCompatActivity() {
             perDialog!!.setCancel(getTrueString(this, R.string.cancal))
             perDialog!!.setSetting(getTrueString(this, R.string.setting_name))
             perDialog!!.setOnCancelClickListener {
+                requestPermissionOver()
                 if (loadMethodFlag) {
                     permissionRejected()
                 }
             }
             perDialog!!.setOnSettingClickListener { //跳转到，设置的对应界面
+                requestPermissionOver()
                 startAppSettings()
             }
         }
@@ -452,6 +458,16 @@ open class ChinaPermissionActivity : AppCompatActivity() {
      * 给子类提供重写的失败接口
      */
     open fun permissionRejected() {}
+
+    /**
+     * 给子类提供重写的请求开始方法
+     */
+    open fun requestPermissionProceed() {}
+
+    /**
+     * 给子类提供重写的请求结束方法
+     */
+    open fun requestPermissionOver() {}
 
     /**
      * 给子类提供重写的检查成功接口
