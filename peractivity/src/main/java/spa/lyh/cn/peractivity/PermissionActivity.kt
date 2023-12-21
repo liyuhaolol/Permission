@@ -50,6 +50,7 @@ open class PermissionActivity : AppCompatActivity() {
         const val NOT_REQUIRED_ONLY_REQUEST = PerUtils.NOT_REQUIRED_ONLY_REQUEST
         private const val SETTING_REQUEST = PerUtils.SETTING_REQUEST
         private var permissionList: HashMap<String, Int> = getPermissionNameList()
+        private var rejectPerList:ArrayList<String> = arrayListOf()//被检查出来的永久拒绝的权限
 
     }
 
@@ -59,10 +60,10 @@ open class PermissionActivity : AppCompatActivity() {
      * @param permissions 不定长数组
      */
     fun askForPermission(code: Int, vararg permissions: String) {
+        rejectPerList.clear()//重置list
         hasReadMediaVisualUserSelected = false//重置为false
-        val realMissPermission: MutableList<String> = ArrayList()
-        var flag = true
-        val per = checkNeedPermission(permissions as Array<String>)
+        val realMissPermission: MutableList<String> = ArrayList()//这个是真正要去请求的权限
+        val per = checkNeedPermission(permissions as Array<String>)//将传入的权限进行过滤，去掉一些特殊无用权限
         for (permission in per) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 //14以上需要判断新权限
@@ -72,20 +73,24 @@ open class PermissionActivity : AppCompatActivity() {
                 }
             }
             //判断权限是否已经被授权
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED
             ) {
+                Log.e("qwer","没有权限")
                 realMissPermission.add(permission)
-                flag = false
             }
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                //当前权限被设置了"不在询问",永远不会弹出进入这里，将dialog显示标志设为true
+                Log.e("qwer","永久拒绝")
+            }
+            /////
         }
         if (realMissPermission.size > 0) {
+            //确实存在要请求的权限，则发起请求
             val missPermissions = realMissPermission.toTypedArray()
             requestPermission(code, *missPermissions)
-        }
-        if (flag) {
+            requestPermissionProceed()
+        }else{
+            //没有要发起请求的权限，则按照方案进行回调
             when (code) {
                 ChinaPermissionActivity.REQUIRED_LOAD_METHOD -> {
                     loadMethodFlag = true
@@ -231,14 +236,23 @@ open class PermissionActivity : AppCompatActivity() {
     }
 
     /**
-     * 给子类提供重写的成功接口
+     * 给子类提供重写的成功方法
      */
     open fun permissionAllowed() {}
 
     /**
-     * 给子类提供重写的失败接口
+     * 给子类提供重写的失败方法
      */
     open fun permissionRejected() {}
+    /**
+     * 给子类提供重写的请求开始方法
+     */
+    open fun requestPermissionProceed() {}
+
+    /**
+     * 给子类提供重写的请求结束方法
+     */
+    open fun requestPermissionOver() {}
     private fun initMissingPermissionDialog() {
         perDialog = PerDialog(this)
         perDialog.setTitle(getTrueString(this, R.string.help))

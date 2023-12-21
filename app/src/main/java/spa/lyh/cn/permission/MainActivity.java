@@ -21,7 +21,7 @@ import spa.lyh.cn.peractivity.ChinaPermissionActivity;
 import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
 
-public class MainActivity extends ChinaPermissionActivity {
+public class MainActivity extends PermissionActivity {
     private TextView tv;
     private Button btn_io,btn_io_check;
 
@@ -35,7 +35,7 @@ public class MainActivity extends ChinaPermissionActivity {
         btn_io = findViewById(R.id.btn_io);
         btn_io_check = findViewById(R.id.btn_io_check);
         //请求权限
-        askForPermission(REQUIRED_LOAD_METHOD,getPermissionList());
+        askForPermission(NOT_REQUIRED_LOAD_METHOD,getPermissionList());
         /*askForPermission(REQUIRED_LOAD_METHOD,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 "定位");*/
@@ -47,24 +47,24 @@ public class MainActivity extends ChinaPermissionActivity {
                 askForPermission(REQUIRED_LOAD_METHOD,getIOPermissionList());
             }
         });
-        btn_io_check.setOnClickListener(new View.OnClickListener() {
+/*        btn_io_check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 checkPermissions(REQUIRED_LOAD_METHOD,getIOPermissionList());
             }
-        });
+        });*/
 
     }
 
     private String[] getPermissionList(){
         List<String> pList = new ArrayList<>();
         pList.add(ManifestPro.permission.CAMERA);
-        pList.add(ManifestPro.permission.ACCESS_FINE_LOCATION);
+/*        pList.add(ManifestPro.permission.ACCESS_FINE_LOCATION);
         pList.add(ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9);//自定义的权限，可以减少Android版本的判断
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
             //13
             pList.add(ManifestPro.permission.POST_NOTIFICATIONS);
-        }
+        }*/
         return pList.toArray(new String[pList.size()]);
     }
 
@@ -105,7 +105,7 @@ public class MainActivity extends ChinaPermissionActivity {
     }
 
 
-    @Override
+/*    @Override
     public void permissionCheck48HPass() {
         Toast.makeText(this,"权限检查通过",Toast.LENGTH_SHORT).show();
     }
@@ -116,5 +116,5 @@ public class MainActivity extends ChinaPermissionActivity {
         for(String per:permissions){
             Log.e("qwer",per);
         }
-    }
+    }*/
 }
