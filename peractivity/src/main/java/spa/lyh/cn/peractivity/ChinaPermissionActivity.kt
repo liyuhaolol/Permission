@@ -255,7 +255,6 @@ open class ChinaPermissionActivity : AppCompatActivity() {
             missPermission!!.addAll(missPerList)
             showMissingPermissionDialog(missPermission!!)
         } else {
-            requestPermissionOver()
             if (loadMethodFlag) {
                 permissionRejected()
             }
@@ -311,6 +310,7 @@ open class ChinaPermissionActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        requestPermissionOver()
         var permissionFlag = missPerList.size <= 0 //权限是否全部通过
         var requiredFlag = false //是否为项目必须的权限
         val per = ArrayList<String>() //保存被拒绝的权限列表
@@ -388,7 +388,6 @@ open class ChinaPermissionActivity : AppCompatActivity() {
             if (missPerList.size > 0){
                 makeReject(requestCode)
             }else{
-                requestPermissionOver()
                 if (loadMethodFlag) {
                     permissionAllowed() //权限通过，执行对应方法
                 }
@@ -408,7 +407,6 @@ open class ChinaPermissionActivity : AppCompatActivity() {
                 }
             } else {
                 Log.e("Permission:", "Permission had been rejected")
-                requestPermissionOver()
                 if (loadMethodFlag) {
                     permissionRejected()
                 }
@@ -423,13 +421,11 @@ open class ChinaPermissionActivity : AppCompatActivity() {
             perDialog!!.setCancel(getTrueString(this, R.string.cancal))
             perDialog!!.setSetting(getTrueString(this, R.string.setting_name))
             perDialog!!.setOnCancelClickListener {
-                requestPermissionOver()
                 if (loadMethodFlag) {
                     permissionRejected()
                 }
             }
             perDialog!!.setOnSettingClickListener { //跳转到，设置的对应界面
-                requestPermissionOver()
                 startAppSettings()
             }
         }

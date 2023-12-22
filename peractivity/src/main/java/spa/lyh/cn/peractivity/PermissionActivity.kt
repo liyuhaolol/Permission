@@ -118,6 +118,7 @@ open class PermissionActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray, ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        requestPermissionOver()
         var permissionFlag = true //权限是否全部通过
         var dialogFlag = false //是否显示设置dialog
         var requiredFlag = false //是否为项目必须的权限
@@ -183,7 +184,6 @@ open class PermissionActivity : AppCompatActivity() {
         //List<Integer> ids = selectGroup(per);//判断被拒绝的权限组名称
         if (permissionFlag) {
             //通过了申请的权限
-            requestPermissionOver()
             if (loadMethodFlag) {
                 permissionAllowed() //权限通过，执行对应方法
             }
@@ -210,7 +210,6 @@ open class PermissionActivity : AppCompatActivity() {
                         missPermission!!.addAll(per)
                         showMissingPermissionDialog(per)
                     } else {
-                        requestPermissionOver()
                         if (loadMethodFlag) {
                             permissionRejected()
                         }
@@ -218,7 +217,6 @@ open class PermissionActivity : AppCompatActivity() {
                 }
             } else {
                 Log.e("Permission:", "Permission had been rejected")
-                requestPermissionOver()
                 if (loadMethodFlag) {
                     permissionRejected()
                 }
@@ -250,13 +248,11 @@ open class PermissionActivity : AppCompatActivity() {
         perDialog.setCancel(getTrueString(this, R.string.cancal))
         perDialog.setSetting(getTrueString(this, R.string.setting_name))
         perDialog.setOnCancelClickListener {
-            requestPermissionOver()
             if (loadMethodFlag) {
                 permissionRejected()
             }
         }
         perDialog.setOnSettingClickListener { //跳转到，设置的对应界面
-            requestPermissionOver()
             startAppSettings()
         }
     }

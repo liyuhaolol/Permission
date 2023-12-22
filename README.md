@@ -2,6 +2,10 @@
 
 PermissionActivity（ChinaPermissionActivity）作为父类的权限申请框架
 
+## 1.2.3更新
+
+- 调整结束回调响应位置，让他响应速度更快
+
 ## 1.2.2更新
 
 - 增加权限发起结束的回调
