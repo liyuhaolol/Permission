@@ -3,7 +3,7 @@ ext {
             versionCode : 22,
             versionName : '1.2.3',
 
-            appcompat : '1.4.0',
+            appcompat : '1.6.1',
             ktx : '1.10.1'
 
     ]

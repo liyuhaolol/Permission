@@ -21,7 +21,7 @@ import spa.lyh.cn.peractivity.ChinaPermissionActivity;
 import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
 
-public class MainActivity extends ChinaPermissionActivity {
+public class MainActivity extends PermissionActivity {
     private TextView tv;
     private Button btn_io,btn_io_check;
 
@@ -47,12 +47,12 @@ public class MainActivity extends ChinaPermissionActivity {
                 askForPermission(REQUIRED_LOAD_METHOD,getIOPermissionList());
             }
         });
-        btn_io_check.setOnClickListener(new View.OnClickListener() {
+/*        btn_io_check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 checkPermissions(REQUIRED_LOAD_METHOD,getIOPermissionList());
             }
-        });
+        });*/
 
     }
 
@@ -118,7 +118,7 @@ public class MainActivity extends ChinaPermissionActivity {
         Log.e("qwer","结束了权限请求");
     }
 
-        @Override
+/*        @Override
     public void permissionCheck48HPass() {
         Toast.makeText(this,"权限检查通过",Toast.LENGTH_SHORT).show();
     }
@@ -129,5 +129,5 @@ public class MainActivity extends ChinaPermissionActivity {
         for(String per:permissions){
             Log.e("qwer",per);
         }
-    }
+    }*/
 }
