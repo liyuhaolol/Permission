@@ -20,12 +20,15 @@ import java.util.List;
 import spa.lyh.cn.peractivity.ChinaPermissionActivity;
 import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
+import spa.lyh.cn.permission.dialog.PerTopDialog;
 
 public class MainActivity extends PermissionActivity {
     private TextView tv;
     private Button btn_io,btn_io_check;
 
     private int sign = 0;//0为app默认发起的那些请求，1为模拟app相册发起的请求
+
+    private PerTopDialog ptDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +37,7 @@ public class MainActivity extends PermissionActivity {
         tv = findViewById(R.id.tv);
         btn_io = findViewById(R.id.btn_io);
         btn_io_check = findViewById(R.id.btn_io_check);
+        ptDialog = new PerTopDialog(this);
         //请求权限
         askForPermission(NOT_REQUIRED_LOAD_METHOD,getPermissionList());
         /*askForPermission(REQUIRED_LOAD_METHOD,
@@ -110,12 +114,16 @@ public class MainActivity extends PermissionActivity {
     public void requestPermissionProceed() {
         super.requestPermissionProceed();
         Log.e("qwer","发起了权限请求");
+        if (!ptDialog.isShowing()){
+            ptDialog.show("权限说明标题","权限说明内容，你为什么要申请这个权限，要做什么。");
+        }
     }
 
     @Override
     public void requestPermissionOver() {
         super.requestPermissionOver();
         Log.e("qwer","结束了权限请求");
+        ptDialog.dismiss();
     }
 
 /*        @Override
