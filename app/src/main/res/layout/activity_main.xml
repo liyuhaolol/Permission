@@ -6,16 +6,20 @@
     android:layout_height="match_parent"
     android:background="#ffffff"
     tools:context=".MainActivity">
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_centerInParent="true">
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="等待权限授权"
+            android:textColor="#222222"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -25,13 +29,35 @@
             android:id="@+id/btn_io"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:text="模拟相册权限请求"
-            android:layout_marginTop="50dp"/>
+            android:textColor="#ffffff" />
+
         <Button
             android:id="@+id/btn_io_check"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:text="检查相册相关权限状态"
-            android:layout_marginTop="50dp"/>
+            android:textColor="#ffffff" />
+        <TextView
+            android:id="@+id/delay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#222222"
+            android:layout_marginTop="20dp"/>
+        <TextView
+            android:id="@+id/result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#222222"
+            android:layout_marginTop="20dp"/>
+
+        <TextView
+            android:id="@+id/pop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#222222"
+            android:layout_marginTop="20dp"/>
     </LinearLayout>
 </RelativeLayout>

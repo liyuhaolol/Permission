@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import androidx.annotation.StringRes
@@ -52,6 +54,32 @@ open class PermissionActivity : AppCompatActivity() {
         private var permissionList: HashMap<String, Int> = getPermissionNameList()
 
     }
+    //判断开始时间点
+    var longDelay:Long = 600//从发起权限开始的延迟
+    var shortDelay:Long = 200//从onPause方法开始的延迟
+    private val delayHandler = Handler(Looper.getMainLooper())
+    private val longRunable:Runnable = Runnable {
+        //先移除另一个倒计时
+        delayHandler.removeCallbacks(shortRunable)
+        if (!isEnd){
+            //当前还未结束
+            isBegin = true
+            requestPermissionProceed()
+        }
+    }
+    private val shortRunable:Runnable = Runnable {
+        //先移除另一个倒计时
+        delayHandler.removeCallbacks(longRunable)
+        if (!isEnd){
+            //当前还未结束
+            isBegin = true
+            requestPermissionProceed()
+        }
+    }
+    var isAsked = false//是否真正在进行权限请求
+    var isBegin = false//是否进行显示回调
+    var isEnd = false//是否已结束请求
+    var enableShortDelay = true//是否启用短延迟。
 
     /**
      * 判断是否拥有权限
@@ -59,6 +87,9 @@ open class PermissionActivity : AppCompatActivity() {
      * @param permissions 不定长数组
      */
     fun askForPermission(code: Int, vararg permissions: String) {
+        isAsked = false
+        isBegin = false
+        isEnd = false
         hasReadMediaVisualUserSelected = false//重置为false
         val realMissPermission: MutableList<String> = ArrayList()//这个是真正要去请求的权限
         val per = checkNeedPermission(permissions as Array<String>)//将传入的权限进行过滤，去掉一些特殊无用权限
@@ -79,7 +110,8 @@ open class PermissionActivity : AppCompatActivity() {
         if (realMissPermission.size > 0) {
             //确实存在要请求的权限，则发起请求
             val missPermissions = realMissPermission.toTypedArray()
-            requestPermissionProceed()
+            isAsked = true
+            delayHandler.postDelayed(longRunable,longDelay)//这里进行延迟调用
             requestPermission(code, *missPermissions)
         }else{
             //没有要发起请求的权限，则按照方案进行回调
@@ -118,7 +150,12 @@ open class PermissionActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray, ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        requestPermissionOver()
+        isEnd = true
+        isAsked = false
+        if (isBegin){
+            //开发方法被回调过，所以这里要回调结束方法
+            requestPermissionOver()
+        }
         var permissionFlag = true //权限是否全部通过
         var dialogFlag = false //是否显示设置dialog
         var requiredFlag = false //是否为项目必须的权限
@@ -335,6 +372,17 @@ open class PermissionActivity : AppCompatActivity() {
         if (requestCode == SETTING_REQUEST) {
             //从设置返回的回调
             recheckPermission()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        //这里假设进行权限请求，拉起权限弹窗后，activity自然会被onPause
+        //系统弹窗无法被直接抓取，已经尝试过数个办法，无法成功。
+        //由于onPause的响应间隔远比发起权限的间隔要低，所以这里延迟200ms，打断已开始的600ms倒计时，力求更精准的开始回调
+        if (isAsked && enableShortDelay){
+            //只有进行了请求才做响应，否则可能会一直错误回调方法
+            delayHandler.postDelayed(shortRunable,shortDelay)
         }
     }
 

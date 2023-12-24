@@ -6,6 +6,8 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import androidx.annotation.StringRes
@@ -64,6 +66,32 @@ open class ChinaPermissionActivity : AppCompatActivity() {
         private const val SETTING_REQUEST = PerUtils.SETTING_REQUEST
         private val permissionList: HashMap<String, Int> = getPermissionNameList()
     }
+    //判断开始时间点
+    var longDelay:Long = 600//从发起权限开始的延迟
+    var shortDelay:Long = 200//从onPause方法开始的延迟
+    private val delayHandler = Handler(Looper.getMainLooper())
+    private val longRunable:Runnable = Runnable {
+        //先移除另一个倒计时
+        delayHandler.removeCallbacks(shortRunable)
+        if (!isEnd){
+            //当前还未结束
+            isBegin = true
+            requestPermissionProceed()
+        }
+    }
+    private val shortRunable:Runnable = Runnable {
+        //先移除另一个倒计时
+        delayHandler.removeCallbacks(longRunable)
+        if (!isEnd){
+            //当前还未结束
+            isBegin = true
+            requestPermissionProceed()
+        }
+    }
+    var isAsked = false//是否真正在进行权限请求
+    var isBegin = false//是否进行显示回调
+    var isEnd = false//是否已结束请求
+    var enableShortDelay = true//是否启用短延迟。
 
     /**
      * 判断是否拥有权限
@@ -71,6 +99,9 @@ open class ChinaPermissionActivity : AppCompatActivity() {
      * @param permissions 不定长数组
      */
     fun askForPermission(code: Int, vararg permissions: String?) {
+        isAsked = false
+        isBegin = false
+        isEnd = false
         hasReadMediaVisualUserSelected = false//重置为false
         missPerList.clear()
         val realMissPermission: MutableList<String> = ArrayList()
@@ -117,7 +148,8 @@ open class ChinaPermissionActivity : AppCompatActivity() {
                 mSharedPreferences.edit().putLong(perName,System.currentTimeMillis()).apply();
             }*/
             val missPermissions = realMissPermission.toTypedArray()
-            requestPermissionProceed()
+            isAsked = true
+            delayHandler.postDelayed(longRunable,longDelay)//这里进行延迟调用
             requestPermission(code, *missPermissions)
         }
         if (flag) {
@@ -310,7 +342,12 @@ open class ChinaPermissionActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        requestPermissionOver()
+        isEnd = true
+        isAsked = false
+        if (isBegin){
+            //开发方法被回调过，所以这里要回调结束方法
+            requestPermissionOver()
+        }
         var permissionFlag = missPerList.size <= 0 //权限是否全部通过
         var requiredFlag = false //是否为项目必须的权限
         val per = ArrayList<String>() //保存被拒绝的权限列表
@@ -567,6 +604,17 @@ open class ChinaPermissionActivity : AppCompatActivity() {
                 }
                 permissionAllowed()
             }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        //这里假设进行权限请求，拉起权限弹窗后，activity自然会被onPause
+        //系统弹窗无法被直接抓取，已经尝试过数个办法，无法成功。
+        //由于onPause的响应间隔远比发起权限的间隔要低，所以这里延迟200ms，打断已开始的600ms倒计时，力求更精准的开始回调
+        if (isAsked && enableShortDelay){
+            //只有进行了请求才做响应，否则可能会一直错误回调方法
+            delayHandler.postDelayed(shortRunable,shortDelay)
         }
     }
 
