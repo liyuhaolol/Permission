@@ -41,12 +41,6 @@
             android:text="检查相册相关权限状态"
             android:textColor="#ffffff" />
         <TextView
-            android:id="@+id/delay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#222222"
-            android:layout_marginTop="20dp"/>
-        <TextView
             android:id="@+id/result"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

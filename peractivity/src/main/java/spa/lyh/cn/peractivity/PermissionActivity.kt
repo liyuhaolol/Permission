@@ -2,9 +2,11 @@ package spa.lyh.cn.peractivity
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -34,10 +36,13 @@ import spa.lyh.cn.peractivity.util.PerUtils.getPermissionNameList
 open class PermissionActivity : AppCompatActivity() {
     private var missPermission: MutableList<String>? = null
     private var hasReadMediaVisualUserSelected = false//是否请求了这个权限
+    private val FILLNAME_OK = "permissionok" // 文件名称
+    private lateinit var mSPok: SharedPreferences
 
     //被永久拒绝之后显示的dialog
     private lateinit var perDialog: PerDialog
     private var loadMethodFlag = false //是否自动加载方法
+    private var needShow = false
     companion object {
         //必须被允许，且自动执行授权后方法
         const val REQUIRED_LOAD_METHOD = PerUtils.REQUIRED_LOAD_METHOD
@@ -54,32 +59,11 @@ open class PermissionActivity : AppCompatActivity() {
         private var permissionList: HashMap<String, Int> = getPermissionNameList()
 
     }
-    //判断开始时间点
-    var longDelay:Long = 600//从发起权限开始的延迟
-    var shortDelay:Long = 200//从onPause方法开始的延迟
-    private val delayHandler = Handler(Looper.getMainLooper())
-    private val longRunable:Runnable = Runnable {
-        //先移除另一个倒计时
-        delayHandler.removeCallbacks(shortRunable)
-        if (!isEnd){
-            //当前还未结束
-            isBegin = true
-            requestPermissionProceed()
-        }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        mSPok = getSharedPreferences(FILLNAME_OK, MODE_PRIVATE)
     }
-    private val shortRunable:Runnable = Runnable {
-        //先移除另一个倒计时
-        delayHandler.removeCallbacks(longRunable)
-        if (!isEnd){
-            //当前还未结束
-            isBegin = true
-            requestPermissionProceed()
-        }
-    }
-    var isAsked = false//是否真正在进行权限请求
-    var isBegin = false//是否进行显示回调
-    var isEnd = false//是否已结束请求
-    var enableShortDelay = true//是否启用短延迟。
 
     /**
      * 判断是否拥有权限
@@ -87,10 +71,8 @@ open class PermissionActivity : AppCompatActivity() {
      * @param permissions 不定长数组
      */
     fun askForPermission(code: Int, vararg permissions: String) {
-        isAsked = false
-        isBegin = false
-        isEnd = false
         hasReadMediaVisualUserSelected = false//重置为false
+        needShow = false//是否显示弹窗
         val realMissPermission: MutableList<String> = ArrayList()//这个是真正要去请求的权限
         val per = checkNeedPermission(permissions as Array<String>)//将传入的权限进行过滤，去掉一些特殊无用权限
         for (permission in per) {
@@ -102,16 +84,25 @@ open class PermissionActivity : AppCompatActivity() {
                 }
             }
             //判断权限是否已经被授权
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                //用户未授权加入列表
                 realMissPermission.add(permission)
+                if (mSPok.getBoolean(permission,true)){
+                    //存在可以授权的权限，则弹窗
+                    needShow = true
+                }
+            }else{
+                //权限已经授权，则强制修改SP为true
+                mSPok.edit().putBoolean(permission,true).apply()
             }
         }
         if (realMissPermission.size > 0) {
             //确实存在要请求的权限，则发起请求
             val missPermissions = realMissPermission.toTypedArray()
-            isAsked = true
-            delayHandler.postDelayed(longRunable,longDelay)//这里进行延迟调用
+            if (needShow){
+                //需要显示，则调用方法
+                requestPermissionProceed()
+            }
             requestPermission(code, *missPermissions)
         }else{
             //没有要发起请求的权限，则按照方案进行回调
@@ -150,10 +141,8 @@ open class PermissionActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray, ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        isEnd = true
-        isAsked = false
-        if (isBegin){
-            //开发方法被回调过，所以这里要回调结束方法
+        if (needShow){
+            //发起方法被回调过，所以这里要回调结束方法
             requestPermissionOver()
         }
         var permissionFlag = true //权限是否全部通过
@@ -190,11 +179,17 @@ open class PermissionActivity : AppCompatActivity() {
                         permissions[i] != ManifestPro.permission.READ_MEDIA_VIDEO){
                         per.add(permissions[i])
                         permissionFlag = false
+                    }else{
+                        //是这两个权限，且在Android14以上，所以需要重置他俩的记录，避免造成用不显示弹窗的问题。
+                        mSPok.edit().putBoolean(permissions[i],true).apply()
                     }
                 }else{
                     per.add(permissions[i])
                     permissionFlag = false
                 }
+            }else{
+                //这里都是被允许的权限，写到SP里记录
+                mSPok.edit().putBoolean(permissions[i],true).apply()
             }
         }
         when (requestCode) {
@@ -225,31 +220,31 @@ open class PermissionActivity : AppCompatActivity() {
                 permissionAllowed() //权限通过，执行对应方法
             }
         } else {
+            for (permission in per) {
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                    //当前权限被设置了"不在询问",永远不会弹出进入这里，将dialog显示标志设为true
+                    dialogFlag = true
+                    //不再询问的权限，SP记录为false
+                    mSPok.edit().putBoolean(permission,false).apply()
+                }else{
+                    //还可以询问的权限要重置为true，避免用户手动修改，这辈子都不显示弹窗
+                    mSPok.edit().putBoolean(permission,true).apply()
+                }
+            }
             if (requiredFlag) {
-                if (per.size > 0) { //严谨判断大于0
-                    for (permission in per) {
-                        if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                                this,
-                                permission
-                            )
-                        ) {
-                            //当前权限被设置了"不在询问",永远不会弹出进入这里，将dialog显示标志设为true
-                            dialogFlag = true
-                        }
-                    }
-                    if (dialogFlag) {
-                        //显示缺少权限，并解释为何需要这个权限
-                        if (missPermission != null) {
-                            missPermission!!.clear()
-                        } else {
-                            missPermission = ArrayList()
-                        }
-                        missPermission!!.addAll(per)
-                        showMissingPermissionDialog(per)
+                if (dialogFlag) {
+                    //显示缺少权限，并解释为何需要这个权限
+                    if (missPermission != null) {
+                        missPermission!!.clear()
                     } else {
-                        if (loadMethodFlag) {
-                            permissionRejected()
-                        }
+                        missPermission = ArrayList()
+                    }
+                    //per包含当次拒绝和永久拒绝的权限。并未将他们分开
+                    missPermission!!.addAll(per)
+                    showMissingPermissionDialog(per)
+                } else {
+                    if (loadMethodFlag) {
+                        permissionRejected()
                     }
                 }
             } else {
@@ -372,17 +367,6 @@ open class PermissionActivity : AppCompatActivity() {
         if (requestCode == SETTING_REQUEST) {
             //从设置返回的回调
             recheckPermission()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        //这里假设进行权限请求，拉起权限弹窗后，activity自然会被onPause
-        //系统弹窗无法被直接抓取，已经尝试过数个办法，无法成功。
-        //由于onPause的响应间隔远比发起权限的间隔要低，所以这里延迟200ms，打断已开始的600ms倒计时，力求更精准的开始回调
-        if (isAsked && enableShortDelay){
-            //只有进行了请求才做响应，否则可能会一直错误回调方法
-            delayHandler.postDelayed(shortRunable,shortDelay)
         }
     }
 

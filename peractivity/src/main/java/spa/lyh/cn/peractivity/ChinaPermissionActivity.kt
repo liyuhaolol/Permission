@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -41,11 +42,14 @@ import spa.lyh.cn.peractivity.util.PerUtils.getPermissionNameList
  */
 open class ChinaPermissionActivity : AppCompatActivity() {
     private val FILLNAME = "chinapermission" // 文件名称
-    private var mSharedPreferences: SharedPreferences? = null
+    private lateinit var mSharedPreferences: SharedPreferences
+    private val FILLNAME_OK = "permissionok" // 文件名称
+    private lateinit var mSPok: SharedPreferences
     private val missPerList = ArrayList<String>()
     private var loadMethodFlag = false//是否自动加载方法
     private var missPermission: ArrayList<String>? = null
     private var hasReadMediaVisualUserSelected = false//是否请求了这个权限
+    private var needShow = false
 
     //被永久拒绝之后显示的dialog
     private var perDialog: PerDialog? = null
@@ -66,43 +70,20 @@ open class ChinaPermissionActivity : AppCompatActivity() {
         private const val SETTING_REQUEST = PerUtils.SETTING_REQUEST
         private val permissionList: HashMap<String, Int> = getPermissionNameList()
     }
-    //判断开始时间点
-    var longDelay:Long = 600//从发起权限开始的延迟
-    var shortDelay:Long = 200//从onPause方法开始的延迟
-    private val delayHandler = Handler(Looper.getMainLooper())
-    private val longRunable:Runnable = Runnable {
-        //先移除另一个倒计时
-        delayHandler.removeCallbacks(shortRunable)
-        if (!isEnd){
-            //当前还未结束
-            isBegin = true
-            requestPermissionProceed()
-        }
-    }
-    private val shortRunable:Runnable = Runnable {
-        //先移除另一个倒计时
-        delayHandler.removeCallbacks(longRunable)
-        if (!isEnd){
-            //当前还未结束
-            isBegin = true
-            requestPermissionProceed()
-        }
-    }
-    var isAsked = false//是否真正在进行权限请求
-    var isBegin = false//是否进行显示回调
-    var isEnd = false//是否已结束请求
-    var enableShortDelay = true//是否启用短延迟。
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        mSharedPreferences = getSharedPreferences(FILLNAME, MODE_PRIVATE)
+        mSPok = getSharedPreferences(FILLNAME_OK, MODE_PRIVATE)
+    }
     /**
      * 判断是否拥有权限
      *
      * @param permissions 不定长数组
      */
     fun askForPermission(code: Int, vararg permissions: String?) {
-        isAsked = false
-        isBegin = false
-        isEnd = false
         hasReadMediaVisualUserSelected = false//重置为false
+        needShow = false//是否显示弹窗
         missPerList.clear()
         val realMissPermission: MutableList<String> = ArrayList()
         var flag = true
@@ -116,40 +97,41 @@ open class ChinaPermissionActivity : AppCompatActivity() {
                 }
             }
             //判断权限是否已经被授权
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                 realMissPermission.add(permission)
                 flag = false
+            }else{
+                //权限已经授权，则强制修改SP为true
+                mSPok.edit().putBoolean(permission,true).apply()
             }
-        }
-        if (mSharedPreferences == null) {
-            mSharedPreferences = getSharedPreferences(FILLNAME, MODE_PRIVATE)
         }
         for (i in realMissPermission.indices) {
             val perName = realMissPermission[i]
-            val mark = mSharedPreferences!!.getLong(perName, 0)
+            val mark = mSharedPreferences.getLong(perName, 0)
             val time = System.currentTimeMillis()
             if (time - mark <= 172800000) {//权限请求间隔不能小于48小时
-                missPerList.add(perName)
+                missPerList.add(perName)//拿到所有小于48小时的权限
             }
         }
         if (realMissPermission.size > 0) {
             if (missPerList.size == realMissPermission.size) {
-                makeReject(code)
+                makeReject(code)//不能显示的权限就是缺少的权限，则直接进入拒绝逻辑
                 return
             }
             for (perName in missPerList) {
-                realMissPermission.remove(perName)
+                realMissPermission.remove(perName)//移除掉所有不能请求的权限
             }
-/*            for (String perName:realMissPermission){
-                mSharedPreferences.edit().putLong(perName,System.currentTimeMillis()).apply();
-            }*/
+            for (perName in realMissPermission){
+                if (mSPok.getBoolean(perName,true)){
+                    //存在可以授权的权限，则弹窗
+                    needShow = true
+                }
+            }
             val missPermissions = realMissPermission.toTypedArray()
-            isAsked = true
-            delayHandler.postDelayed(longRunable,longDelay)//这里进行延迟调用
+            if (needShow){
+                //需要显示，则调用方法
+                requestPermissionProceed()
+            }
             requestPermission(code, *missPermissions)
         }
         if (flag) {
@@ -185,9 +167,6 @@ open class ChinaPermissionActivity : AppCompatActivity() {
         missPerList.clear()
         val realMissPermission: ArrayList<String> = ArrayList()
         var flag = true
-        if (mSharedPreferences == null) {
-            mSharedPreferences = getSharedPreferences(FILLNAME, MODE_PRIVATE)
-        }
         for (permission in permissions) {
             var isIt = false//是他
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -203,7 +182,7 @@ open class ChinaPermissionActivity : AppCompatActivity() {
                     permission
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                val mark = mSharedPreferences!!.getLong(permission, -1L)
+                val mark = mSharedPreferences.getLong(permission, -1L)
                 if (mark != -1L){
                     //代表权限曾被请求过
                     realMissPermission.add(permission)
@@ -217,7 +196,7 @@ open class ChinaPermissionActivity : AppCompatActivity() {
         }
         for (i in realMissPermission.indices) {
             val perName = realMissPermission[i]
-            val mark = mSharedPreferences!!.getLong(perName, 0)
+            val mark = mSharedPreferences.getLong(perName, 0)
             val time = System.currentTimeMillis()
             if (time - mark <= 172800000) {//权限请求间隔不能小于48小时
                 missPerList.add(perName)
@@ -336,16 +315,10 @@ open class ChinaPermissionActivity : AppCompatActivity() {
         ActivityCompat.requestPermissions(this, permissions, code)
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        isEnd = true
-        isAsked = false
-        if (isBegin){
-            //开发方法被回调过，所以这里要回调结束方法
+        if (needShow){
+            //发起方法被回调过，所以这里要回调结束方法
             requestPermissionOver()
         }
         var permissionFlag = missPerList.size <= 0 //权限是否全部通过
@@ -381,21 +354,23 @@ open class ChinaPermissionActivity : AppCompatActivity() {
                         permissions[i] != ManifestPro.permission.READ_MEDIA_VIDEO){
                         per.add(permissions[i])
                         permissionFlag = false
-                        mSharedPreferences!!.edit().putLong(permissions[i], System.currentTimeMillis())
+                        mSharedPreferences.edit().putLong(permissions[i], System.currentTimeMillis())
                             .apply()
                     }else{
                         //将这两个权限的请求时间记录清除，重置为0
-                        mSharedPreferences!!.edit().putLong(permissions[i], 0).apply()
+                        mSharedPreferences.edit().putLong(permissions[i], 0).apply()
+                        mSPok.edit().putBoolean(permissions[i],true).apply()
                     }
                 }else{
                     per.add(permissions[i])
                     permissionFlag = false
-                    mSharedPreferences!!.edit().putLong(permissions[i], System.currentTimeMillis())
+                    mSharedPreferences.edit().putLong(permissions[i], System.currentTimeMillis())
                         .apply()
                 }
             } else {
                 //权限通过了，重置为0
-                mSharedPreferences!!.edit().putLong(permissions[i], 0).apply()
+                mSharedPreferences.edit().putLong(permissions[i], 0).apply()
+                mSPok.edit().putBoolean(permissions[i],true).apply()
             }
         }
         when (requestCode) {
@@ -430,18 +405,25 @@ open class ChinaPermissionActivity : AppCompatActivity() {
                 }
             }
         } else {
-            if (requiredFlag) {
-                if (per.size > 0) { //严谨判断大于0
-                    //显示缺少权限，并解释为何需要这个权限
-                    if (missPermission != null) {
-                        missPermission!!.clear()
-                    } else {
-                        missPermission = ArrayList()
-                    }
-                    missPermission!!.addAll(per)
-                    missPermission!!.addAll(missPerList)
-                    showMissingPermissionDialog(missPermission!!)
+            for (permission in per) {
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                    //不再询问的权限，SP记录为false
+                    mSPok.edit().putBoolean(permission,false).apply()
+                }else{
+                    //还可以询问的权限要重置为true，避免用户手动修改，这辈子都不显示弹窗
+                    mSPok.edit().putBoolean(permission,true).apply()
                 }
+            }
+            if (requiredFlag) {
+                //显示缺少权限，并解释为何需要这个权限
+                if (missPermission != null) {
+                    missPermission!!.clear()
+                } else {
+                    missPermission = ArrayList()
+                }
+                missPermission!!.addAll(per)
+                missPermission!!.addAll(missPerList)
+                showMissingPermissionDialog(missPermission!!)
             } else {
                 Log.e("Permission:", "Permission had been rejected")
                 if (loadMethodFlag) {
@@ -604,17 +586,6 @@ open class ChinaPermissionActivity : AppCompatActivity() {
                 }
                 permissionAllowed()
             }
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        //这里假设进行权限请求，拉起权限弹窗后，activity自然会被onPause
-        //系统弹窗无法被直接抓取，已经尝试过数个办法，无法成功。
-        //由于onPause的响应间隔远比发起权限的间隔要低，所以这里延迟200ms，打断已开始的600ms倒计时，力求更精准的开始回调
-        if (isAsked && enableShortDelay){
-            //只有进行了请求才做响应，否则可能会一直错误回调方法
-            delayHandler.postDelayed(shortRunable,shortDelay)
         }
     }
 
