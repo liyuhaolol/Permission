@@ -2,6 +2,10 @@
 
 PermissionActivity（ChinaPermissionActivity）作为父类的权限申请框架
 
+## 1.2.6更新
+
+- 迁移到mavencentral
+
 ## 1.2.5更新
 
 - 重大调整，彻底废除延迟弹窗的逻辑，因为Flyme的授权延迟太过于不稳定
