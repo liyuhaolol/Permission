@@ -2,18 +2,24 @@ package spa.lyh.cn.permission;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +42,10 @@ public class MainActivity extends PermissionActivity {
 
     private long beginTime = 0;
 
+    ActivityResultLauncher<PickVisualMediaRequest> pickMedia;
+
+    String mimeType = "image/gif";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,13 +63,44 @@ public class MainActivity extends PermissionActivity {
         /*askForPermission(REQUIRED_LOAD_METHOD,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 "定位");*/
+        boolean result = ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(this);
+        Log.e("qwer",result+"");
+        pickMedia =
+                registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
+                    // Callback is invoked after the user selects a media item or closes the
+                    // photo picker.
+                    if (uri != null) {
+                        Log.e("qwer", "Selected URI: " + uri);
+                    } else {
+                        Log.e("qwer", "No media selected");
+                    }
+                });
+
+/*        pickMedia.launch(new PickVisualMediaRequest.Builder()
+                .setMediaType(ActivityResultContracts.PickVisualMedia.ImageAndVideo.INSTANCE)
+                .build());
+        pickMedia.launch(new PickVisualMediaRequest.Builder()
+                .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                .build());
+
+        pickMedia.launch(new PickVisualMediaRequest.Builder()
+                .setMediaType(ActivityResultContracts.PickVisualMedia.VideoOnly.INSTANCE)
+                .build());
+
+        pickMedia.launch(new PickVisualMediaRequest.Builder()
+                .setMediaType(new ActivityResultContracts.PickVisualMedia.SingleMimeType(mimeType))
+                .build());*/
+
 
         btn_io.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sign = 1;
+                /*sign = 1;
                 beginTime = System.currentTimeMillis();
-                askForPermission(REQUIRED_LOAD_METHOD,getIOPermissionList());
+                askForPermission(REQUIRED_LOAD_METHOD,getIOPermissionList());*/
+                pickMedia.launch(new PickVisualMediaRequest.Builder()
+                        .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                        .build());
             }
         });
 /*        btn_io_check.setOnClickListener(new View.OnClickListener() {
@@ -68,6 +109,16 @@ public class MainActivity extends PermissionActivity {
                 checkPermissions(REQUIRED_LOAD_METHOD,getIOPermissionList());
             }
         });*/
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 101) { // 检测请求码
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                Log.e("qwer","有数据返回");
+            }
+        }
     }
 
     private String[] getPermissionList(){
