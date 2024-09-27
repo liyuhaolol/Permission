@@ -29,6 +29,7 @@ import spa.lyh.cn.peractivity.ChinaPermissionActivity;
 import spa.lyh.cn.peractivity.ManifestPro;
 import spa.lyh.cn.peractivity.PermissionActivity;
 import spa.lyh.cn.permission.dialog.PerTopDialog;
+import spa.lyh.cn.permission.test.PickImage;
 
 public class MainActivity extends PermissionActivity {
     private TextView tv;
@@ -66,7 +67,7 @@ public class MainActivity extends PermissionActivity {
         boolean result = ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(this);
         Log.e("qwer",result+"");
         pickMedia =
-                registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
+                registerForActivityResult(new PickImage(), uri -> {
                     // Callback is invoked after the user selects a media item or closes the
                     // photo picker.
                     if (uri != null) {
@@ -98,8 +99,11 @@ public class MainActivity extends PermissionActivity {
                 /*sign = 1;
                 beginTime = System.currentTimeMillis();
                 askForPermission(REQUIRED_LOAD_METHOD,getIOPermissionList());*/
-                pickMedia.launch(new PickVisualMediaRequest.Builder()
+                /*pickMedia.launch(new PickVisualMediaRequest.Builder()
                         .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                        .build());*/
+                pickMedia.launch(new PickVisualMediaRequest.Builder()
+                        .setMediaType(new ActivityResultContracts.PickVisualMedia.SingleMimeType("*/*"))
                         .build());
             }
         });
