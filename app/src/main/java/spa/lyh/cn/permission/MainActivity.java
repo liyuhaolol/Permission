@@ -102,9 +102,10 @@ public class MainActivity extends PermissionActivity {
                 /*pickMedia.launch(new PickVisualMediaRequest.Builder()
                         .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
                         .build());*/
-                pickMedia.launch(new PickVisualMediaRequest.Builder()
-                        .setMediaType(new ActivityResultContracts.PickVisualMedia.SingleMimeType("*/*"))
-                        .build());
+                //pickMedia.launch(new PickVisualMediaRequest.Builder()
+                        //.setMediaType(new ActivityResultContracts.PickVisualMedia.SingleMimeType("*/*"))
+                        //.build());
+                askForPermission(NOT_REQUIRED_LOAD_METHOD,ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_13);
             }
         });
 /*        btn_io_check.setOnClickListener(new View.OnClickListener() {

@@ -9,7 +9,7 @@ plugins{
     id("net.thebugmc.gradle.sonatype-central-portal-publisher") version "1.2.3"
 }
 
-val versionName = "1.2.6"
+val versionName = "1.2.7"
 
 android {
     namespace = "spa.lyh.cn.peractivity"

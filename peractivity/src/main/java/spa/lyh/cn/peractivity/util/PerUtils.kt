@@ -62,12 +62,12 @@ object PerUtils {
     fun checkNeedPermission(permission: Array<String>): Array<String> {
         val per = ArrayList<String>()
         //先处理向上兼容的权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             //12
             for (permi in permission) {
                 if (permi != ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9
                     && permi != ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9
-                    && permi != ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11
+                    && permi != ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_13
                 ) {
                     per.add(permi)
                 }
@@ -78,7 +78,7 @@ object PerUtils {
                 if (permi != ManifestPro.permission.READ_PHONE_STATE_BLOW_ANDROID_9
                     && permi != ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9
                 ) {
-                    if (permi == ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11) {
+                    if (permi == ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_13) {
                         per.add(ManifestPro.permission.READ_EXTERNAL_STORAGE)
                     } else {
                         per.add(permi)
@@ -92,7 +92,7 @@ object PerUtils {
                     per.add(ManifestPro.permission.READ_PHONE_STATE)
                 } else if (permi == ManifestPro.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9) {
                     per.add(ManifestPro.permission.WRITE_EXTERNAL_STORAGE)
-                } else if (permi == ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11) {
+                } else if (permi == ManifestPro.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_13) {
                     per.add(ManifestPro.permission.READ_EXTERNAL_STORAGE)
                 } else {
                     per.add(permi)

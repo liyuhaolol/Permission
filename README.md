@@ -2,6 +2,11 @@
 
 PermissionActivity（ChinaPermissionActivity）作为父类的权限申请框架
 
+
+## 1.2.7更新
+
+- 读取权限自定义申请从Android11以下调整到安卓13以下
+
 ## 1.2.6更新
 
 - 迁移到mavencentral

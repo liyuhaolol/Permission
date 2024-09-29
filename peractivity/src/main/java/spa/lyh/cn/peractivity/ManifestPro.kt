@@ -29,7 +29,7 @@ object ManifestPro {
         const val RECEIVE_WAP_PUSH = "android.permission.RECEIVE_WAP_PUSH"
         const val RECEIVE_MMS = "android.permission.RECEIVE_MMS"
         const val READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE"
-        const val READ_EXTERNAL_STORAGE_BLOW_ANDROID_11 = "android.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_11"
+        const val READ_EXTERNAL_STORAGE_BLOW_ANDROID_13 = "android.permission.READ_EXTERNAL_STORAGE_BLOW_ANDROID_13"
         const val WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE"
         const val WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9 = "android.permission.WRITE_EXTERNAL_STORAGE_BLOW_ANDROID_9"
         //Android13新引入权限
